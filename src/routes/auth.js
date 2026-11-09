@@ -7,6 +7,7 @@ const { verifyCsrfBody } = require('../csrf');
 const config = require('../config');
 
 const authLimiter = criarRateLimiter({
+    namespace: 'auth',
     windowMs: 15 * 60 * 1000, // 15 minutos
     // Em testes o limite é elevado para não interferir com vários logins;
     // em produção mantém-se o valor seguro por omissão.

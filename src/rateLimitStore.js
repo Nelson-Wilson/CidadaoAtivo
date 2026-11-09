@@ -11,12 +11,22 @@ const db = require('./db');
  * A tabela `rate_limits` é criada por database/schema.sql.
  */
 class PostgresRateLimitStore {
-    constructor({ windowMs = 60 * 1000 } = {}) {
+    constructor({ windowMs = 60 * 1000, namespace = '' } = {}) {
         this.windowMs = windowMs;
+        // Namespace estável por limitador: sem isto, todos os limitadores
+        // (login, chatbot, relatório, comentários, IA) somavam no mesmo
+        // contador por IP e bloqueavam-se uns aos outros.
+        this.namespace = String(namespace || '').slice(0, 60);
         this.ultimaLimpeza = 0;
         // Indica ao express-rate-limit que as chaves são partilhadas entre
         // instâncias (evita os avisos de dupla contagem).
         this.localKeys = false;
+    }
+
+    /** Prefixa a chave com o namespace do limitador e respeita o limite da coluna. */
+    chaveCompleta(key) {
+        const base = String(key);
+        return (this.namespace ? `${this.namespace}:${base}` : base).slice(0, 255);
     }
 
     init(options) {
@@ -25,7 +35,7 @@ class PostgresRateLimitStore {
     }
 
     async increment(key) {
-        const chave = String(key).slice(0, 255);
+        const chave = this.chaveCompleta(key);
         const resetTime = new Date(Date.now() + this.windowMs);
 
         try {
@@ -66,7 +76,7 @@ class PostgresRateLimitStore {
                 `UPDATE rate_limits
                     SET total_hits = GREATEST(total_hits - 1, 0), updated_at = now()
                   WHERE key = ?`,
-                [String(key).slice(0, 255)]
+                [this.chaveCompleta(key)]
             );
         } catch (err) {
             console.error('[RateLimit] Falha ao decrementar contador:', err.message);
@@ -75,7 +85,7 @@ class PostgresRateLimitStore {
 
     async resetKey(key) {
         try {
-            await db.query('DELETE FROM rate_limits WHERE key = ?', [String(key).slice(0, 255)]);
+            await db.query('DELETE FROM rate_limits WHERE key = ?', [this.chaveCompleta(key)]);
         } catch (err) {
             console.error('[RateLimit] Falha ao reiniciar contador:', err.message);
         }

@@ -103,6 +103,18 @@ describe('Rate limiting partilhado', () => {
         expect((await lojaA.increment('login:127.0.0.1')).totalHits).toBe(1);
     });
 
+    test('limitadores com namespaces diferentes não partilham contadores', async () => {
+        const lojaAuth = new PostgresRateLimitStore({ windowMs: 15 * 60 * 1000, namespace: 'auth-teste' });
+        const lojaRelatorio = new PostgresRateLimitStore({ windowMs: 60 * 1000, namespace: 'relatorio-teste' });
+
+        expect((await lojaAuth.increment('10.99.0.1')).totalHits).toBe(1);
+        expect((await lojaRelatorio.increment('10.99.0.1')).totalHits).toBe(1);
+        expect((await lojaAuth.increment('10.99.0.1')).totalHits).toBe(2);
+
+        await lojaAuth.resetKey('10.99.0.1');
+        await lojaRelatorio.resetKey('10.99.0.1');
+    });
+
     test('o middleware devolve 429 depois do máximo', async () => {
         const mini = express();
         mini.get(

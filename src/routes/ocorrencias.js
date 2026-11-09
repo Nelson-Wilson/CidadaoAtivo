@@ -16,6 +16,7 @@ const ORDEM_PRIORIDADE = { baixa: 0, normal: 1, urgente: 2, muito_urgente: 3 };
 const ESTADOS_SEM_PARTICIPACAO = ['fechada', 'rejeitada'];
 
 const comentarioLimiter = criarRateLimiter({
+    namespace: 'comentario',
     windowMs: 10 * 60 * 1000,
     max: parseInt(process.env.COMMENT_RATE_LIMIT_MAX || '20', 10),
     standardHeaders: true,

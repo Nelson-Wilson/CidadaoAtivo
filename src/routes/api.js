@@ -17,6 +17,7 @@ const servicoChatbot = require('../services/ai/servicoChatbot');
 // Rate limiting para proteção contra negação de carteira (Denial-of-Wallet) e DoS.
 // Os contadores são partilhados em PostgreSQL para funcionarem entre instâncias.
 const chatbotLimiter = criarRateLimiter({
+    namespace: 'chatbot',
     windowMs: 60 * 1000,
     max: parseInt(process.env.CHATBOT_RATE_LIMIT_MAX || '15', 10),
     standardHeaders: true,
@@ -25,6 +26,7 @@ const chatbotLimiter = criarRateLimiter({
 });
 
 const aiLimiter = criarRateLimiter({
+    namespace: 'ai',
     windowMs: 60 * 1000,
     max: parseInt(process.env.AI_RATE_LIMIT_MAX || '30', 10),
     standardHeaders: true,

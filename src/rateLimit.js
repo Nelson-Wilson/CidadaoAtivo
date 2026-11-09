@@ -13,10 +13,10 @@ const { PostgresRateLimitStore } = require('./rateLimitStore');
  * express-rate-limit recusa reutilizar a mesma instância em middlewares
  * diferentes.
  */
-function criarRateLimiter(opcoes) {
+function criarRateLimiter({ namespace, ...opcoes }) {
     const store = config.isTest
         ? undefined
-        : new PostgresRateLimitStore({ windowMs: opcoes.windowMs });
+        : new PostgresRateLimitStore({ windowMs: opcoes.windowMs, namespace });
 
     return rateLimit({
         ...opcoes,

@@ -16,6 +16,7 @@ const papeisPermitidos = [Usuario.PAPEL_MUNICIPIO, Usuario.PAPEL_ADMIN];
 
 // O relatório pode chamar a IA (custo): limite por IP.
 const relatorioLimiter = criarRateLimiter({
+    namespace: 'relatorio',
     windowMs: 60 * 1000,
     max: parseInt(process.env.REPORT_RATE_LIMIT_MAX || '5', 10),
     standardHeaders: true,
