@@ -1,6 +1,6 @@
-const config = require('./src/config');
-const db = require('./src/db');
-const { createApp } = require('./src/app');
+const config = require('../src/config');
+const db = require('../src/db');
+const { createApp } = require('../src/app');
 
 /** Arranque local (npm run dev / npm start). Na Vercel usa-se api/index.js. */
 function iniciar() {

@@ -28,7 +28,7 @@ const origemSupabase = (() => {
 /**
  * Constrói a aplicação Express sem a colocar à escuta.
  *
- * Serve o servidor local (server.js), a função serverless da Vercel
+ * Serve o servidor local (scripts/servidor-local.js), a função serverless da Vercel
  * (api/index.js) e os testes de integração (Supertest). Em testes usa-se um
  * MemoryStore isolado; em produção/dev usa-se o store PostgreSQL revogável.
  *
