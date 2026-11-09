@@ -61,6 +61,16 @@ A suite cobre 77 testes unitários e 31 de integração (108 no total): domínio
 Corre sem Supabase nem MySQL: os testes de integração usam um Postgres real em memória ([PGlite](https://pglite.dev)) com o mesmo `database/schema.sql`.
 O GitHub Actions corre `npm ci`, a compilação do Tailwind e a suite completa em cada push para `main` (`.github/workflows/ci.yml`).
 
+## Verificação de produção
+
+Com o `.env` preenchido, corra:
+
+```bash
+npm run preflight
+```
+
+O preflight valida a ligação ao Supabase, as tabelas e o RLS, o upload/leitura/remoção no bucket, a chave Gemini e a disponibilidade dos modelos configurados. Nunca imprime segredos.
+
 ## Publicar
 
 Siga **[DEPLOY.md](DEPLOY.md)** (Supabase → Vercel, passo a passo).

@@ -30,6 +30,8 @@ SEED_DEMO=false SEED_ADMIN_EMAIL=admin@seudominio.com SEED_ADMIN_PASSWORD='uma-p
 Entre com esse admin e, em **Admin → Utilizadores**, crie as contas de técnicos e gestores municipais.
 Para testar com dados e contas de demonstração use `npm run seed` sem `SEED_DEMO=false`; em produção as contas de teste só são criadas com `SEED_TEST_USERS=true`.
 
+Antes de publicar, valide tudo com `npm run preflight` (base de dados, schema/RLS, bucket e Gemini). O comando não imprime segredos.
+
 ## 3. Vercel
 
 1. Envie o projeto para o GitHub (o `.gitignore` exclui `.env`, `node_modules`, `coverage` e `public/uploads`).
