@@ -55,10 +55,11 @@ Antes de publicar, valide tudo com `npm run preflight` (base de dados, schema/RL
    | IA | `GEMINI_API_KEY`, `AI_API_URL`, `AI_MODEL`, `AI_MODEL_FALLBACK`, `AI_THINKING_LEVEL`, `AI_TIMEOUT_MS`, `AI_FEATURE_*`, `AI_DUPLICATE_RADIUS_KM` |
    | Limites | `AUTH_RATE_LIMIT_MAX`, `COMMENT_RATE_LIMIT_MAX`, `CHATBOT_RATE_LIMIT_MAX`, `AI_RATE_LIMIT_MAX`, `REPORT_RATE_LIMIT_MAX` |
 
-   O `APP_URL` vem como `https://cidadao-ativo.vercel.app`. Se o projeto novo tiver outro domínio, altere apenas essa linha no `.env`, volte a correr `npm run env:vercel` e importe novamente.
+   O `APP_URL` vem como `https://cidadao-ativo-beta.vercel.app` (domínio de produção atual). Se o projeto novo tiver outro domínio, altere apenas essa linha no `.env`, volte a correr `npm run env:vercel` e importe novamente.
 
    Gere o segredo com `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`.
-4. Deploy. Verifique `https://SEU-DOMINIO/health` → `{"status":"ok","storage":"supabase","ai":"gemini"}`.
+4. Deploy. Verifique `https://cidadao-ativo-beta.vercel.app/health` → `{"status":"ok","storage":"supabase","ai":"gemini"}`.
+   A raiz `/` redireciona para `/inicio` (ver `vercel.json`): o caminho raiz é reservado pela Vercel e devolve `FUNCTION_INVOCATION_FAILED` antes do Express. Use sempre `/inicio` como endereço da página inicial.
 
 ## 4. Verificação depois do deploy
 
@@ -78,4 +79,4 @@ Antes de publicar, valide tudo com `npm run preflight` (base de dados, schema/RL
 - **Planos gratuitos**: o Supabase pode pausar projetos inativos e tem limites de armazenamento/egress; o Gemini free tier tem quotas por minuto/dia. No momento da verificação, o `gemini-3.6-flash` gratuito tinha um limite diário de 20 pedidos; o fallback cobre falhas pontuais, mas não substitui um plano pago para uso municipal real.
 - **Sessões e rate limiting partilhados**: usam PostgreSQL, pelo que são consistentes entre instâncias serverless; exigem que `database/schema.sql` tenha sido executado.
 - **RLS sem políticas**: a chave `anon` do Supabase não acede a nenhuma tabela. O servidor liga-se com a role Postgres através de `DATABASE_URL`.
-- **Ainda não houve ensaio numa conta real Vercel/Supabase**: os testes automáticos cobrem Postgres real em memória (PGlite), rotas, sessões, rate limiting e o armazenamento Supabase com `fetch` simulado. A verificação da secção 4 é obrigatória antes de abrir ao público.
+- **Estado do ensaio real**: o projeto está publicado em `https://cidadao-ativo-beta.vercel.app` com Supabase e Gemini reais. A verificação da secção 4 continua a ser obrigatória antes de abrir ao público e deve ser repetida após cada alteração ao schema, às variáveis de ambiente ou ao `vercel.json`.

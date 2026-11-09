@@ -65,7 +65,7 @@ const conteudo = `# ============================================================
 # ==============================================================================
 
 # --- Aplicacao -----------------------------------------------------------------
-APP_URL=${seguro(valor('APP_URL', 'https://cidadao-ativo.vercel.app'))}
+APP_URL=${seguro(valor('APP_URL', 'https://cidadao-ativo-beta.vercel.app'))}
 APP_TIMEZONE=${seguro(valor('APP_TIMEZONE', 'Africa/Maputo'))}
 # A Vercel esta atras de 1 proxy (necessario para IP real e cookies secure).
 TRUST_PROXY=${seguro(valor('TRUST_PROXY', '1'))}
