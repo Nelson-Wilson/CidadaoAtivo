@@ -9,6 +9,7 @@
     "dev": "node --watch server.js",
     "seed": "node database/seed.js",
     "preflight": "node scripts/preflight.js",
+    "env:vercel": "node scripts/gerar-env-vercel.js",
     "build": "npm run build:css",
     "build:css": "tailwindcss -i src/styles/app.css -o public/css/app.css --minify",
     "watch:css": "tailwindcss -i src/styles/app.css -o public/css/app.css --watch",

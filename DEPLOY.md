@@ -36,20 +36,26 @@ Antes de publicar, valide tudo com `npm run preflight` (base de dados, schema/RL
 
 ## 3. Vercel
 
-1. Envie o projeto para o GitHub (o `.gitignore` exclui `.env`, `node_modules`, `coverage` e `public/uploads`).
+1. Envie o projeto para o GitHub (o `.gitignore` exclui `.env`, `.env.*`, `node_modules`, `coverage` e `public/uploads`).
 2. [vercel.com/new](https://vercel.com/new) → importe o repositório. Framework: **Other**. O `vercel.json` já define `npm run build:css` e encaminha tudo para `api/index.js`.
-3. **Environment Variables** (Production):
+3. Gere a cópia importável a partir do `.env` já validado:
 
-   | Variável | Obrigatória | Notas |
-   |---|---|---|
-   | `SESSION_SECRET` | Sim | 48 bytes aleatórios; a app recusa arrancar em produção com um segredo fraco. |
-   | `DATABASE_URL` | Sim | Transaction pooler do Supabase (porta 6543). |
-   | `SUPABASE_URL` | Sim (fotos) | URL do projeto. |
-   | `SUPABASE_SERVICE_ROLE_KEY` | Sim (fotos) | Secreta; só no servidor. |
-   | `SUPABASE_STORAGE_BUCKET` | Não | Por omissão `ocorrencias`. |
-   | `GEMINI_API_KEY` | Recomendada | Sem ela, a IA fica em modo de contingência. |
-   | `APP_URL` | Recomendada | `https://o-seu-dominio.com`. |
-   | `AI_MODEL`, `AI_MODEL_FALLBACK`, `AI_THINKING_LEVEL` | Não | Por omissão `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `LOW`. |
+   ```bash
+   npm run env:vercel
+   ```
+
+   O comando cria `.env.vercel` (ignorado pelo Git) com as 31 variáveis de produção e confirma que os segredos não foram alterados. Importe esse ficheiro em **Settings → Environment Variables → Import .env** e marque **Production** e **Preview**.
+
+   | Grupo | Variáveis incluídas no ficheiro |
+   |---|---|
+   | Aplicação | `APP_URL`, `APP_TIMEZONE`, `TRUST_PROXY` |
+   | Sessão | `SESSION_SECRET` |
+   | Base de dados | `DATABASE_URL`, `DB_POOL_MAX` |
+   | Fotografias | `STORAGE_DRIVER`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET`, `UPLOAD_MAX_BYTES` |
+   | IA | `GEMINI_API_KEY`, `AI_API_URL`, `AI_MODEL`, `AI_MODEL_FALLBACK`, `AI_THINKING_LEVEL`, `AI_TIMEOUT_MS`, `AI_FEATURE_*`, `AI_DUPLICATE_RADIUS_KM` |
+   | Limites | `AUTH_RATE_LIMIT_MAX`, `COMMENT_RATE_LIMIT_MAX`, `CHATBOT_RATE_LIMIT_MAX`, `AI_RATE_LIMIT_MAX`, `REPORT_RATE_LIMIT_MAX` |
+
+   O `APP_URL` vem como `https://cidadao-ativo.vercel.app`. Se o projeto novo tiver outro domínio, altere apenas essa linha no `.env`, volte a correr `npm run env:vercel` e importe novamente.
 
    Gere o segredo com `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`.
 4. Deploy. Verifique `https://SEU-DOMINIO/health` → `{"status":"ok","storage":"supabase","ai":"gemini"}`.
@@ -69,7 +75,7 @@ Antes de publicar, valide tudo com `npm run preflight` (base de dados, schema/RL
 
 - **Fotografias até 4 MB** (a Vercel limita o corpo de um pedido a 4,5 MB). Telemóveis modernos geram fotos maiores: o cidadão recebe uma mensagem de erro. Para aceitar mais, comprima no browser antes do envio ou faça upload direto ao Supabase com URL assinado.
 - **Duração máxima da função**: 60 segundos (`vercel.json`). As chamadas Gemini têm timeout configurável (`AI_TIMEOUT_MS`) e fallback de modelo; evite valores que somem mais do que esse limite.
-- **Planos gratuitos**: o Supabase pode pausar projetos inativos e tem limites de armazenamento/egress; o Gemini free tier tem quotas por minuto/dia. O fallback e as contingências locais reduzem o impacto, mas não substituem um plano adequado a produção.
+- **Planos gratuitos**: o Supabase pode pausar projetos inativos e tem limites de armazenamento/egress; o Gemini free tier tem quotas por minuto/dia. No momento da verificação, o `gemini-3.6-flash` gratuito tinha um limite diário de 20 pedidos; o fallback cobre falhas pontuais, mas não substitui um plano pago para uso municipal real.
 - **Sessões e rate limiting partilhados**: usam PostgreSQL, pelo que são consistentes entre instâncias serverless; exigem que `database/schema.sql` tenha sido executado.
 - **RLS sem políticas**: a chave `anon` do Supabase não acede a nenhuma tabela. O servidor liga-se com a role Postgres através de `DATABASE_URL`.
 - **Ainda não houve ensaio numa conta real Vercel/Supabase**: os testes automáticos cobrem Postgres real em memória (PGlite), rotas, sessões, rate limiting e o armazenamento Supabase com `fetch` simulado. A verificação da secção 4 é obrigatória antes de abrir ao público.

@@ -1,4 +1,8 @@
-require('dotenv').config();
+// Em testes não se carrega o .env: a suite usa PGlite, storage local e IA desligada.
+// Isto impede que credenciais de produção sejam usadas acidentalmente pelos testes.
+if (process.env.NODE_ENV !== 'test') {
+    require('dotenv').config();
+}
 
 /**
  * Configuração centralizada da aplicação Cidadão Ativo.

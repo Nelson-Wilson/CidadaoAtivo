@@ -5,8 +5,12 @@
  * que a suite seja determinística e não gaste tokens.
  */
 process.env.NODE_ENV = 'test';
-delete process.env.DATABASE_URL; // os testes usam sempre o Postgres em memória (PGlite)
+// Strings vazias (em vez de delete) impedem o dotenv de repor credenciais reais.
+process.env.DATABASE_URL = ''; // os testes usam sempre o Postgres em memória (PGlite)
 process.env.STORAGE_DRIVER = 'local';
+process.env.SUPABASE_URL = '';
+process.env.SUPABASE_SERVICE_ROLE_KEY = '';
+process.env.SUPABASE_STORAGE_BUCKET = '';
 process.env.SESSION_SECRET = 'segredo-apenas-para-testes';
 process.env.AUTH_RATE_LIMIT_MAX = '1000';
 process.env.CHATBOT_RATE_LIMIT_MAX = '1000';
@@ -22,5 +26,5 @@ process.env.AI_FEATURE_CHATBOT = 'false';
 process.env.AI_FEATURE_SMART_DASHBOARD = 'false';
 process.env.AI_FEATURE_PHOTO_ANALYSIS = 'false';
 process.env.AI_FEATURE_EXECUTIVE_REPORT = 'false';
-delete process.env.GEMINI_API_KEY;
+process.env.GEMINI_API_KEY = '';
 process.env.AI_API_KEY = '';
