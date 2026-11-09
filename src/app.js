@@ -60,7 +60,6 @@ function createApp({ sessionStore } = {}) {
                     'data:',
                     'blob:',
                     'https://server.arcgisonline.com',
-                    'https://*.basemaps.cartocdn.com',
                     ...(origemSupabase ? [origemSupabase] : []),
                 ],
                 connectSrc: ["'self'"],

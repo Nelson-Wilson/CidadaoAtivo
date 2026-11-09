@@ -14,10 +14,9 @@
         }
 
         var mapa = L.map(el).setView([-25.9692, 32.5732], 12);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-            maxZoom: 20,
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+            maxZoom: 19,
         }).addTo(mapa);
 
         if (pontos.length && typeof L.heatLayer === 'function') {
