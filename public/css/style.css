@@ -1,4 +1,4 @@
-/* Cidadão Ativo — apenas ajustes que o Tailwind (via CDN) não cobre. */
+/* Cidadão Ativo — ajustes que o Tailwind compilado (src/styles/app.css) não cobre. */
 
 #map, #reports-map, #heatmap, #location-picker {
     border-radius: 0.75rem;

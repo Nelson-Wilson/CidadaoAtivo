@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.15",
-    "@electric-sql/pglite-socket": "^0.2.18",
     "@tailwindcss/cli": "^4.3.5",
     "cross-env": "^10.1.0",
     "jest": "^30.5.2",
