@@ -1,0 +1,34 @@
+<%- include('../layouts/header') %>
+
+<div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center print:hidden">
+    <a href="<%= url('/municipio/dashboard') %>" class="inline-flex items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+        Voltar ao painel
+    </a>
+    <button type="button" data-print class="ca-btn-primary self-start">Imprimir / guardar PDF</button>
+</div>
+
+<article class="ca-card ca-card-pad max-w-3xl print:border-0 print:shadow-none">
+    <p class="ca-eyebrow mb-1">Gerado em <%= formatDateTime(generatedAt) %> · <%= report.fonte === 'ia' ? 'redigido com IA a partir dos dados reais' : 'gerado automaticamente a partir dos dados' %></p>
+    <h1 class="ca-page-title mb-4"><%= report.titulo %></h1>
+    <p class="mb-6 text-base leading-relaxed text-slate-700 dark:text-slate-300"><%= report.resumo %></p>
+
+    <div class="mb-8 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
+        <div class="rounded-xl border border-slate-200 p-3 dark:border-slate-700"><p class="text-2xl font-bold text-slate-900 dark:text-white"><%= stats.total %></p><p class="text-[11px] text-slate-500 dark:text-slate-400">Ocorrências</p></div>
+        <div class="rounded-xl border border-slate-200 p-3 dark:border-slate-700"><p class="text-2xl font-bold text-slate-900 dark:text-white"><%= stats.taxa_resolucao %>%</p><p class="text-[11px] text-slate-500 dark:text-slate-400">Resolvidas</p></div>
+        <div class="rounded-xl border border-slate-200 p-3 dark:border-slate-700"><p class="text-2xl font-bold text-slate-900 dark:text-white"><%= stats.sla_atrasadas %></p><p class="text-[11px] text-slate-500 dark:text-slate-400">Fora do SLA</p></div>
+        <div class="rounded-xl border border-slate-200 p-3 dark:border-slate-700"><p class="text-2xl font-bold text-slate-900 dark:text-white"><%= stats.satisfacao_media !== null ? stats.satisfacao_media : '—' %></p><p class="text-[11px] text-slate-500 dark:text-slate-400">Satisfação (de 5)</p></div>
+    </div>
+
+    <h2 class="mb-2 font-display text-lg font-bold text-slate-900 dark:text-white">Destaques</h2>
+    <ul class="mb-6 list-disc space-y-1.5 pl-5 text-sm text-slate-700 dark:text-slate-300">
+        <% report.destaques.forEach(function(d) { %><li><%= d %></li><% }) %>
+    </ul>
+
+    <h2 class="mb-2 font-display text-lg font-bold text-slate-900 dark:text-white">Recomendações</h2>
+    <ol class="list-decimal space-y-1.5 pl-5 text-sm text-slate-700 dark:text-slate-300">
+        <% report.recomendacoes.forEach(function(r) { %><li><%= r %></li><% }) %>
+    </ol>
+</article>
+
+<%- include('../layouts/footer') %>

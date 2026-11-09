@@ -1,0 +1,74 @@
+<%- include('../layouts/header') %>
+
+<header class="mb-6">
+    <span class="ca-eyebrow">Administração</span>
+    <h1 class="ca-page-title mt-1">Utilizadores</h1>
+    <p class="ca-muted mt-1">Contas de pessoal. Os cidadãos registam-se sozinhos.</p>
+</header>
+<%- include('_tabs', { tab: tab }) %>
+
+<section class="ca-card ca-card-pad mb-6">
+    <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">Nova conta de pessoal</h2>
+    <form method="POST" action="<%= url('/admin/utilizadores') %>" class="mt-4 grid items-end gap-4 sm:grid-cols-3">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div>
+            <label for="u-name" class="ca-label">Nome</label>
+            <input id="u-name" name="name" required value="<%= old.name || '' %>" class="ca-input">
+        </div>
+        <div>
+            <label for="u-email" class="ca-label">Email</label>
+            <input id="u-email" type="email" name="email" required value="<%= old.email || '' %>" class="ca-input">
+        </div>
+        <div>
+            <label for="u-pass" class="ca-label">Password (mín. 8)</label>
+            <input id="u-pass" type="password" name="password" minlength="8" required autocomplete="new-password" class="ca-input">
+        </div>
+        <div>
+            <label for="u-role" class="ca-label">Papel</label>
+            <select id="u-role" name="role" class="ca-input">
+                <% [['tecnico','Técnico'],['municipio','Gestor municipal'],['admin','Administrador']].forEach(function(r) { %>
+                    <option value="<%= r[0] %>" <%= old.role === r[0] ? 'selected' : '' %>><%= r[1] %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div>
+            <label for="u-mun" class="ca-label">Município</label>
+            <select id="u-mun" name="municipality_id" class="ca-input">
+                <option value="">—</option>
+                <% municipalities.forEach(function(m) { %><option value="<%= m.id %>" <%= Number(old.municipality_id) === Number(m.id) ? 'selected' : '' %>><%= m.name %></option><% }) %>
+            </select>
+        </div>
+        <div>
+            <label for="u-dep" class="ca-label">Departamento (técnicos)</label>
+            <select id="u-dep" name="department_id" class="ca-input">
+                <option value="">—</option>
+                <% departments.forEach(function(d) { %><option value="<%= d.id %>" <%= Number(old.department_id) === Number(d.id) ? 'selected' : '' %>><%= d.municipality_name %> · <%= d.name %></option><% }) %>
+            </select>
+        </div>
+        <div class="sm:col-span-3">
+            <button type="submit" class="ca-btn-primary">Criar conta</button>
+        </div>
+    </form>
+</section>
+
+<section class="ca-card overflow-x-auto">
+    <table class="ca-table min-w-[40rem]">
+        <thead>
+            <tr><th>Nome</th><th>Email</th><th>Papel</th><th>Município</th><th>Departamento</th><th>Criada em</th></tr>
+        </thead>
+        <tbody>
+        <% users.forEach(function(u) { %>
+            <tr>
+                <td class="font-medium text-slate-900 dark:text-slate-100"><%= u.name %></td>
+                <td class="text-slate-500 dark:text-slate-400"><%= u.email %></td>
+                <td><span class="ca-chip"><%= roleLabel(u.role) %></span></td>
+                <td class="text-slate-500 dark:text-slate-400"><%= u.municipality_name || '—' %></td>
+                <td class="text-slate-500 dark:text-slate-400"><%= u.department_name || '—' %></td>
+                <td class="text-slate-400 dark:text-slate-500"><%= formatDate(u.created_at) %></td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+</section>
+
+<%- include('../layouts/footer') %>

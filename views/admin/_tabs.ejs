@@ -1,0 +1,4 @@
+<div class="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Administração">
+    <a href="<%= url('/admin/categorias') %>" class="<%= tab === 'categorias' ? 'ca-btn-primary' : 'ca-btn-secondary' %>" <%- tab === 'categorias' ? 'aria-current="page"' : '' %>>Categorias e SLA</a>
+    <a href="<%= url('/admin/utilizadores') %>" class="<%= tab === 'utilizadores' ? 'ca-btn-primary' : 'ca-btn-secondary' %>" <%- tab === 'utilizadores' ? 'aria-current="page"' : '' %>>Utilizadores</a>
+</div>
