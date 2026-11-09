@@ -38,6 +38,22 @@ const origemSupabase = (() => {
 function createApp({ sessionStore } = {}) {
     const app = express();
 
+    // TEMPORARIO: inspeciona o caminho recebido pela funcao na Vercel.
+    if (process.env.NODE_ENV !== 'test') {
+        app.use((req, res, next) => {
+            if (req.query.__diag_path === '7f3a9c2e') {
+                return res.json({
+                    url: req.url,
+                    originalUrl: req.originalUrl,
+                    path: req.path,
+                    baseUrl: req.baseUrl,
+                    method: req.method,
+                });
+            }
+            next();
+        });
+    }
+
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, '..', 'views'));
     app.disable('x-powered-by');
