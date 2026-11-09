@@ -186,7 +186,7 @@ function presente(nome, minimo = 1) {
                 const texto = await AIClient.enviarMensagem({
                     systemPrompt: 'Responde apenas com a palavra OK.',
                     messages: [{ role: 'user', content: 'ping' }],
-                    maxTokens: 8,
+                    maxTokens: 256,
                     temperature: 0,
                     tentativas: 1,
                 });
