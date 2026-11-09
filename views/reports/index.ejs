@@ -1,0 +1,94 @@
+<%- include('../layouts/header') %>
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+        <h1 class="font-display text-3xl font-bold text-ink mb-1">As minhas denúncias</h1>
+        <p class="text-sm text-ink/50">Acompanha o estado das tuas ocorrências e as respostas do município.</p>
+    </div>
+    <a href="<%= url('/denuncias/nova') %>"
+       class="inline-flex items-center gap-2 rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition self-start sm:self-auto">
+        <span>+</span>
+        <span>Nova denúncia</span>
+    </a>
+</div>
+
+<% if (!itens.length) { %>
+    <div class="text-center py-20 bg-white border border-dashed border-jacaranda-200 rounded-3xl p-8 shadow-soft">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-jacaranda-50 flex items-center justify-center text-3xl">
+            🌱
+        </div>
+        <h2 class="font-display text-xl font-semibold text-ink mb-2">Ainda não tens nenhuma ocorrência registada</h2>
+        <p class="text-ink/60 text-sm max-w-md mx-auto mb-6">
+            Sempre que encontrares um problema na via pública ou no teu bairro, podes reportá-lo aqui para que as equipas municipais intervenham.
+        </p>
+        <a href="<%= url('/denuncias/nova') %>"
+           class="inline-flex items-center gap-2 rounded-full bg-jacaranda-600 text-white px-6 py-3 font-semibold text-sm hover:bg-jacaranda-700 shadow-sm transition">
+            <span>📸 Reportar o meu primeiro problema</span>
+        </a>
+    </div>
+<% } else { %>
+    <div class="space-y-4">
+        <% itens.forEach(function(report) { %>
+            <a href="<%= url('/denuncias/' + report.id) %>"
+               class="group block bg-white rounded-3xl border border-jacaranda-100 p-5 hover:border-jacaranda-300 hover:shadow-card transition duration-200">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <% if (report.photo_path) { %>
+                        <img src="<%= url(report.photo_path) %>" alt="<%= report.category_name %>"
+                             class="w-full sm:w-24 h-24 object-cover rounded-2xl border border-jacaranda-100 shrink-0">
+                    <% } else { %>
+                        <div class="w-full sm:w-24 h-24 rounded-2xl bg-jacaranda-50 flex items-center justify-center text-jacaranda-400 text-2xl shrink-0">
+                            📍
+                        </div>
+                    <% } %>
+
+                    <div class="flex-1 min-w-0 w-full">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-mono text-ink/40 font-semibold">#<%= report.id %></span>
+                                <strong class="font-display text-lg font-semibold text-ink group-hover:text-jacaranda-700 transition truncate">
+                                    <%= report.category_name %>
+                                </strong>
+                            </div>
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full border <%= statusClasses(report.status) %>">
+                                <%= statusLabel(report.status) %>
+                            </span>
+                        </div>
+
+                        <p class="text-sm text-ink/70 line-clamp-2 mb-3 leading-relaxed">
+                            <%= report.description %>
+                        </p>
+
+                        <div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-ink/40">
+                            <span class="flex items-center gap-1">
+                                <span>🏙️</span>
+                                <span><%= report.neighborhood || 'Maputo Cidade' %></span>
+                            </span>
+                            <span>·</span>
+                            <span class="flex items-center gap-1">
+                                <span>📅</span>
+                                <span><%= formatarData(report.created_at) %></span>
+                            </span>
+                            <span class="ml-auto text-jacaranda-600 font-semibold group-hover:translate-x-0.5 transition hidden sm:inline">
+                                Ver acompanhamento →
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        <% }) %>
+    </div>
+
+    <% const totalPages = Math.ceil(total / porPagina); %>
+    <% if (totalPages > 1) { %>
+        <div class="mt-8 flex items-center justify-center gap-2 text-sm">
+            <% for (let p = 1; p <= totalPages; p++) { %>
+                <a href="<%= url('/denuncias?page=' + p) %>"
+                   class="w-10 h-10 flex items-center justify-center rounded-2xl font-semibold <%= p === pagina ? 'bg-jacaranda-600 text-white shadow-sm' : 'bg-white border border-jacaranda-100 text-ink/70 hover:bg-jacaranda-50' %> transition">
+                    <%= p %>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+<% } %>
+
+<%- include('../layouts/footer') %>

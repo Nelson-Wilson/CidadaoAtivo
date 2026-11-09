@@ -1,0 +1,31 @@
+<%- include('../layouts/header') %>
+
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
+    <a href="<%= url('/municipio/dashboard') %>" class="text-sm text-ink/50 hover:text-jacaranda-600 transition">← Voltar ao painel</a>
+    <button type="button" data-print class="self-start rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-5 py-2.5 text-xs font-semibold transition">Imprimir / guardar PDF</button>
+</div>
+
+<article class="bg-white border border-jacaranda-100 rounded-3xl p-8 shadow-soft max-w-3xl">
+    <p class="text-xs uppercase tracking-wider text-ink/40 mb-1">Gerado em <%= formatarData(generatedAt) %> · <%= report.fonte === 'ia' ? 'redigido com IA a partir dos dados reais' : 'gerado automaticamente a partir dos dados' %></p>
+    <h1 class="font-display text-3xl font-bold text-ink mb-4"><%= report.titulo %></h1>
+    <p class="text-base text-ink/80 leading-relaxed mb-6"><%= report.resumo %></p>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-center">
+        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.total %></p><p class="text-[11px] text-ink/50">Ocorrências</p></div>
+        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.taxa_resolucao %>%</p><p class="text-[11px] text-ink/50">Resolvidas</p></div>
+        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.sla_atrasadas %></p><p class="text-[11px] text-ink/50">Fora do SLA</p></div>
+        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.satisfacao_media !== null ? stats.satisfacao_media : '—' %></p><p class="text-[11px] text-ink/50">Satisfação (de 5)</p></div>
+    </div>
+
+    <h2 class="font-display text-lg font-semibold text-ink mb-2">Destaques</h2>
+    <ul class="list-disc pl-5 space-y-1.5 text-sm text-ink/80 mb-6">
+        <% report.destaques.forEach(function(d) { %><li><%= d %></li><% }) %>
+    </ul>
+
+    <h2 class="font-display text-lg font-semibold text-ink mb-2">Recomendações</h2>
+    <ol class="list-decimal pl-5 space-y-1.5 text-sm text-ink/80">
+        <% report.recomendacoes.forEach(function(r) { %><li><%= r %></li><% }) %>
+    </ol>
+</article>
+
+<%- include('../layouts/footer') %>

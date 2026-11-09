@@ -1,0 +1,72 @@
+<%- include('../layouts/header') %>
+
+<div class="mb-6">
+    <h1 class="font-display text-3xl font-bold text-ink">Administração</h1>
+    <p class="text-sm text-ink/50">Categorias de ocorrências, departamento responsável e prazo padrão de resolução (SLA).</p>
+</div>
+<%- include('_tabs', { tab: tab }) %>
+
+<div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft mb-8 overflow-x-auto">
+    <table class="w-full text-left text-sm">
+        <thead>
+            <tr class="text-xs uppercase tracking-wider text-ink/40 border-b border-jacaranda-100">
+                <th class="py-2 pr-3">Categoria</th><th class="py-2 pr-3">Departamento</th><th class="py-2 pr-3">SLA (horas)</th><th class="py-2 pr-3">Denúncias</th><th class="py-2"></th>
+            </tr>
+        </thead>
+        <tbody>
+        <% categories.forEach(function(c) { %>
+            <tr class="border-b border-jacaranda-50 align-middle">
+                <td class="py-2 pr-3">
+                    <form method="POST" action="<%= url('/admin/categorias/' + c.id) %>" id="cat-<%= c.id %>">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    </form>
+                    <input form="cat-<%= c.id %>" name="name" value="<%= c.name %>" required maxlength="80" class="w-full rounded-xl border border-jacaranda-100 px-3 py-1.5 text-sm"></td>
+                <td class="py-2 pr-3">
+                    <select form="cat-<%= c.id %>" name="department_id" class="rounded-xl border border-jacaranda-100 px-3 py-1.5 text-sm">
+                        <option value="">— sem departamento —</option>
+                        <% departments.forEach(function(d) { %>
+                            <option value="<%= d.id %>" <%= Number(c.department_id) === Number(d.id) ? 'selected' : '' %>><%= d.municipality_name %> · <%= d.name %></option>
+                        <% }) %>
+                    </select>
+                </td>
+                <td class="py-2 pr-3"><input form="cat-<%= c.id %>" type="number" name="sla_hours" value="<%= c.sla_hours %>" min="1" max="2160" required class="w-24 rounded-xl border border-jacaranda-100 px-3 py-1.5 text-sm"></td>
+                <td class="py-2 pr-3 text-ink/60"><%= c.reports_count %></td>
+                <td class="py-2 text-right whitespace-nowrap">
+                    <button form="cat-<%= c.id %>" type="submit" class="rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-4 py-1.5 text-xs font-semibold">Guardar</button>
+                    <% if (Number(c.reports_count) === 0) { %>
+                        <form method="POST" action="<%= url('/admin/categorias/' + c.id + '/remover') %>" class="inline" data-confirm="Remover esta categoria?">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="rounded-full border border-laterite-100 text-laterite-600 hover:bg-laterite-50 px-4 py-1.5 text-xs font-semibold">Remover</button>
+                        </form>
+                    <% } %>
+                </td>
+            </tr>
+        <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+    <h2 class="font-display text-lg font-semibold text-ink mb-4">Nova categoria</h2>
+    <form method="POST" action="<%= url('/admin/categorias') %>" class="grid sm:grid-cols-4 gap-4 items-end">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="sm:col-span-1">
+            <label for="n-name" class="text-xs font-semibold text-ink/60 block mb-1">Nome</label>
+            <input id="n-name" name="name" required maxlength="80" value="<%= old.name || '' %>" placeholder="Ex.: Sinalização danificada" class="w-full rounded-xl border border-jacaranda-100 px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label for="n-dep" class="text-xs font-semibold text-ink/60 block mb-1">Departamento responsável</label>
+            <select id="n-dep" name="department_id" class="w-full rounded-xl border border-jacaranda-100 px-3 py-2 text-sm">
+                <option value="">— sem departamento —</option>
+                <% departments.forEach(function(d) { %><option value="<%= d.id %>"><%= d.municipality_name %> · <%= d.name %></option><% }) %>
+            </select>
+        </div>
+        <div>
+            <label for="n-sla" class="text-xs font-semibold text-ink/60 block mb-1">Prazo SLA (horas)</label>
+            <input id="n-sla" type="number" name="sla_hours" min="1" max="2160" value="<%= old.sla_hours || 72 %>" required class="w-full rounded-xl border border-jacaranda-100 px-3 py-2 text-sm">
+        </div>
+        <button type="submit" class="rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-6 py-2.5 text-sm font-semibold transition">Criar categoria</button>
+    </form>
+</div>
+
+<%- include('../layouts/footer') %>

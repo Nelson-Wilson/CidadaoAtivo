@@ -1,0 +1,20 @@
+# Dependências
+node_modules/
+
+# Ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Artefactos de execução
+coverage/
+public/uploads/
+*.log
+npm-debug.log*
+
+# Ferramentas e sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.vercel/

@@ -1,0 +1,178 @@
+<%- include('../layouts/header') %>
+
+<div class="mb-6 flex items-center gap-2 text-sm text-ink/50">
+    <a href="<%= url('/denuncias') %>" class="hover:text-jacaranda-600 transition flex items-center gap-1">
+        <span>←</span>
+        <span>Voltar às minhas denúncias</span>
+    </a>
+</div>
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm font-mono text-ink/40 font-bold">#<%= report.id %></span>
+            <h1 class="font-display text-2xl sm:text-3xl font-bold text-ink"><%= report.category_name %></h1>
+        </div>
+        <p class="text-xs sm:text-sm text-ink/50 mt-1">Registada em <%= formatarData(report.created_at) %> no bairro <%= report.neighborhood || 'Maputo' %></p>
+    </div>
+    <span class="self-start sm:self-auto text-sm font-semibold px-4 py-1.5 rounded-full border <%= statusClasses(report.status) %> shadow-xs">
+        <%= statusLabel(report.status) %>
+    </span>
+</div>
+
+<!-- Barra de Progresso Visual da Ocorrência (Status Stepper) -->
+<div class="mb-10 bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+    <h2 class="text-xs font-semibold uppercase tracking-wider text-ink/40 mb-4">Progresso do Atendimento</h2>
+    <%
+        const etapas = [
+            { id: 'recebida', label: 'Recebida' },
+            { id: 'em_analise', label: 'Em Análise' },
+            { id: 'atribuida', label: 'Atribuída' },
+            { id: 'em_execucao', label: 'Em Execução' },
+            { id: 'resolvida', label: 'Resolvida' },
+        ];
+        const statusIdx = etapas.findIndex(e => e.id === report.status);
+    %>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+        <% etapas.forEach(function(etapa, idx) {
+            const concluida = statusIdx >= idx;
+            const atual = statusIdx === idx;
+        %>
+            <div class="p-3 rounded-2xl border transition <%= atual ? 'border-jacaranda-500 bg-jacaranda-50 font-bold text-jacaranda-800' : (concluida ? 'border-mangrove-200 bg-mangrove-50/50 text-mangrove-700' : 'border-jacaranda-50 text-ink/30') %>">
+                <div class="text-sm mb-1">
+                    <%= concluida ? '✓' : (idx + 1) %>
+                </div>
+                <span><%= etapa.label %></span>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Evidência e Descrição -->
+    <div class="space-y-6">
+        <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+            <h2 class="font-display text-lg font-semibold text-ink mb-4">Registo do Problema</h2>
+            <% if (report.photo_path) { %>
+                <img src="<%= url(report.photo_path) %>" alt="Fotografia da ocorrência"
+                     class="w-full max-h-96 rounded-2xl border border-jacaranda-100 object-cover mb-4">
+            <% } %>
+
+            <div class="bg-parchment rounded-2xl p-4 border border-jacaranda-100/60 mb-6">
+                <p class="text-xs font-semibold text-ink/50 uppercase tracking-wider mb-1">Descrição do Cidadão</p>
+                <p class="text-sm text-ink/90 leading-relaxed"><%- nl2br(report.description) %></p>
+            </div>
+
+            <p class="text-xs text-ink/60 mb-4">
+                👍 <strong><%= report.votes_count %></strong> cidadãos confirmaram esta ocorrência ·
+                <a href="<%= url('/ocorrencias/' + report.id) %>" class="text-jacaranda-600 font-semibold hover:underline">Ver página pública e comentários</a>
+            </p>
+
+            <dl class="grid grid-cols-2 gap-4 text-xs text-ink/70">
+                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
+                    <span class="text-ink/40 block mb-0.5 font-medium">Bairro</span>
+                    <strong class="text-ink text-sm"><%= report.neighborhood || 'Não indicado' %></strong>
+                </div>
+                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
+                    <span class="text-ink/40 block mb-0.5 font-medium">Município</span>
+                    <strong class="text-ink text-sm"><%= report.municipality_name || 'Maputo' %></strong>
+                </div>
+                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
+                    <span class="text-ink/40 block mb-0.5 font-medium">Departamento</span>
+                    <strong class="text-ink text-sm"><%= report.department_name || 'A aguardar triagem' %></strong>
+                </div>
+                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
+                    <span class="text-ink/40 block mb-0.5 font-medium">Localização</span>
+                    <a href="https://www.openstreetmap.org/?mlat=<%= report.latitude %>&mlon=<%= report.longitude %>#map=18"
+                       target="_blank" class="text-jacaranda-600 font-semibold hover:underline block truncate">
+                        Abrir mapa ↗
+                    </a>
+                </div>
+            </dl>
+
+            <% if (report.resolution_photo || report.resolution_note) { %>
+                <div class="mt-6 rounded-2xl border border-mangrove-100 bg-mangrove-50/50 p-4">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-mangrove-700 mb-2">Resolução</h3>
+                    <% if (report.resolution_photo) { %>
+                        <img src="<%= url(report.resolution_photo) %>" alt="Fotografia da resolução"
+                             class="w-full max-h-72 rounded-xl border border-mangrove-100 object-cover mb-3">
+                    <% } %>
+                    <% if (report.resolution_note) { %>
+                        <p class="text-sm text-mangrove-800 leading-relaxed"><%- nl2br(report.resolution_note) %></p>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Histórico de Atualizações da Máquina de Estados -->
+    <div class="space-y-6">
+        <% if (canRate) { %>
+            <div class="bg-mangrove-50/60 border border-mangrove-100 rounded-3xl p-6 shadow-soft">
+                <h2 class="font-display text-lg font-semibold text-ink mb-1">O problema foi resolvido?</h2>
+                <p class="text-xs text-ink/60 mb-4">Avalia o serviço. A tua avaliação fecha a denúncia.</p>
+                <form method="POST" action="<%= url('/denuncias/' + report.id + '/avaliar') %>" class="space-y-4">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <fieldset>
+                        <legend class="text-xs font-semibold text-ink/60 mb-2">Nota</legend>
+                        <div class="flex gap-2">
+                            <% [1,2,3,4,5].forEach(function(n) { %>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="score" value="<%= n %>" class="peer sr-only" <%= n === 5 ? 'checked' : '' %>>
+                                    <span class="block w-11 h-11 rounded-xl border border-mangrove-100 bg-white text-center leading-[2.7rem] font-bold text-ink/60 peer-checked:bg-mangrove-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-mangrove-600"><%= n %></span>
+                                </label>
+                            <% }) %>
+                        </div>
+                        <p class="text-[11px] text-ink/40 mt-1">1 = muito insatisfeito · 5 = muito satisfeito</p>
+                    </fieldset>
+                    <div>
+                        <label for="feedback" class="text-xs font-semibold text-ink/60 block mb-1">Comentário (opcional)</label>
+                        <textarea id="feedback" name="feedback" rows="3" maxlength="1000"
+                                  class="w-full rounded-2xl border border-jacaranda-100 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-jacaranda-400"
+                                  placeholder="Como correu a reparação?"></textarea>
+                    </div>
+                    <button type="submit" class="rounded-full bg-mangrove-600 hover:bg-mangrove-700 text-white px-6 py-2.5 text-sm font-semibold transition">Avaliar e fechar</button>
+                </form>
+            </div>
+        <% } else if (rating) { %>
+            <div class="bg-mangrove-50/60 border border-mangrove-100 rounded-3xl p-6 shadow-soft">
+                <h2 class="font-display text-lg font-semibold text-ink mb-1">A tua avaliação</h2>
+                <p class="text-2xl text-baobab-400" aria-label="<%= rating.score %> de 5"><%= '★'.repeat(rating.score) %><span class="text-ink/20"><%= '★'.repeat(5 - rating.score) %></span></p>
+                <% if (rating.feedback) { %><p class="text-sm text-ink/70 mt-2"><%- nl2br(rating.feedback) %></p><% } %>
+            </div>
+        <% } %>
+
+        <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+            <h2 class="font-display text-lg font-semibold text-ink mb-4 flex items-center gap-2">
+                <span>📋</span>
+                <span>Linha do Tempo de Atendimento</span>
+            </h2>
+
+            <% if (!history || !history.length) { %>
+                <p class="text-xs text-ink/50 py-4">Sem registos de histórico.</p>
+            <% } else { %>
+                <div class="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-jacaranda-100">
+                    <% history.forEach(function(entry) { %>
+                        <div class="relative group">
+                            <span class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white bg-jacaranda-500 shadow-xs"></span>
+                            <div class="bg-parchment/60 rounded-2xl p-3.5 border border-jacaranda-50">
+                                <strong class="text-sm font-semibold text-ink block mb-0.5">
+                                    <%= statusLabel(entry.new_status) %>
+                                </strong>
+                                <div class="flex items-center justify-between text-[11px] text-ink/50">
+                                    <span><%= formatarData(entry.created_at) %></span>
+                                    <span><%= entry.changed_by_name ? 'Por: ' + entry.changed_by_name : '' %></span>
+                                </div>
+                                <% if (entry.note) { %>
+                                    <p class="text-xs text-ink/70 mt-2 rounded-xl bg-white/70 border border-jacaranda-50 p-2.5"><%- nl2br(entry.note) %></p>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

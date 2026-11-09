@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <meta name="theme-color" content="#57407F">
+    <title>Cidadão Ativo — <%= typeof title !== 'undefined' ? title : 'Plataforma de Reporte Urbano' %></title>
+
+    <!-- Assets locais: sem CDNs, fontes externas ou scripts inline (compatível com CSP). -->
+    <link rel="stylesheet" href="<%= url('vendor/leaflet/leaflet.css') %>">
+    <link rel="stylesheet" href="<%= url('css/app.css') %>">
+    <link rel="stylesheet" href="<%= url('css/style.css') %>">
+</head>
+<body class="bg-parchment text-ink font-sans antialiased min-h-screen flex flex-col selection:bg-jacaranda-100 selection:text-jacaranda-700"
+      data-api-base="<%= url('/api') %>">
+
+<!-- Barra de Topo Institucional / Aviso Cívico -->
+<div class="bg-jacaranda-700 text-white/90 text-xs py-1.5 px-5 border-b border-jacaranda-800">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Conselho Municipal de Maputo · Plataforma de Gestão e Participação Cívica</span>
+        </div>
+        <div class="hidden sm:flex items-center gap-4 text-white/70">
+            <span>Urgências: 198 (Bombeiros) / 112 (Polícia)</span>
+        </div>
+    </div>
+</div>
+
+<!-- Navegação Principal -->
+<nav class="bg-white/90 backdrop-blur-md border-b border-jacaranda-100/80 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between gap-4">
+        <a href="<%= url('/') %>" class="flex items-center gap-2.5 group">
+            <div class="w-9 h-9 rounded-xl bg-jacaranda-600 flex items-center justify-center text-white text-lg shadow-sm group-hover:bg-jacaranda-700 transition">
+                📍
+            </div>
+            <div>
+                <span class="font-display text-xl font-bold text-jacaranda-700 tracking-tight block leading-tight">Cidadão Ativo</span>
+                <span class="text-[10px] text-ink/50 uppercase tracking-wider font-semibold block">Maputo Conectado</span>
+            </div>
+        </a>
+
+        <div class="flex items-center gap-3 sm:gap-5 text-sm">
+            <a href="<%= url('/') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition hidden md:inline">Mapa Público</a>
+
+            <% if (usuarioAtual) { %>
+                <% if (usuarioAtual.role === 'cidadao') { %>
+                    <a href="<%= url('/denuncias') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition">As minhas denúncias</a>
+                    <a href="<%= url('/denuncias/nova') %>"
+                       class="inline-flex items-center gap-2 rounded-full bg-jacaranda-600 text-white px-4 py-2 font-medium hover:bg-jacaranda-700 shadow-sm hover:shadow transition">
+                        <span>+</span>
+                        <span class="hidden sm:inline">Reportar problema</span>
+                        <span class="sm:hidden">Reportar</span>
+                    </a>
+                <% } else if (usuarioAtual.role === 'tecnico') { %>
+                    <a href="<%= url('/tecnico/tarefas') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition flex items-center gap-1.5">
+                        <span>Minhas tarefas</span>
+                        <span class="px-2 py-0.5 rounded-full bg-jacaranda-100 text-jacaranda-700 text-xs font-semibold">Técnico</span>
+                    </a>
+                <% } else if (usuarioAtual.role === 'municipio' || usuarioAtual.role === 'admin') { %>
+                    <a href="<%= url('/municipio/dashboard') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition">Dashboard</a>
+                    <a href="<%= url('/municipio/denuncias') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition">Gestão</a>
+                    <a href="<%= url('/municipio/relatorio') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition hidden md:inline">Relatório</a>
+                    <% if (usuarioAtual.role === 'admin') { %>
+                        <a href="<%= url('/admin/categorias') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition hidden md:inline">Categorias</a>
+                        <a href="<%= url('/admin/utilizadores') %>" class="text-ink/70 hover:text-jacaranda-600 font-medium transition hidden md:inline">Utilizadores</a>
+                    <% } %>
+                    <span class="px-2.5 py-0.5 rounded-full bg-jacaranda-100 text-jacaranda-700 text-xs font-semibold hidden sm:inline"><%= usuarioAtual.role === 'admin' ? 'Admin' : 'Município' %></span>
+                <% } %>
+
+                <div class="h-5 w-px bg-jacaranda-100 mx-1"></div>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-ink/60 font-medium hidden lg:inline max-w-[120px] truncate" title="<%= usuarioAtual.name %>">
+                        <%= usuarioAtual.name %>
+                    </span>
+                    <form method="POST" action="<%= url('/logout') %>" class="inline">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="text-ink/50 hover:text-laterite-600 font-medium text-xs sm:text-sm transition flex items-center gap-1">
+                            <span>Sair</span>
+                        </button>
+                    </form>
+                </div>
+            <% } else { %>
+                <a href="<%= url('/login') %>" class="text-ink/70 hover:text-ink font-medium transition px-3 py-1.5 rounded-lg hover:bg-jacaranda-50">Entrar</a>
+                <a href="<%= url('/registar') %>"
+                   class="inline-flex items-center gap-1.5 rounded-full bg-jacaranda-600 text-white px-4 sm:px-5 py-2 font-medium hover:bg-jacaranda-700 shadow-sm transition">
+                    <span>Criar conta</span>
+                </a>
+            <% } %>
+        </div>
+    </div>
+</nav>
+
+<main class="flex-1 w-full max-w-6xl mx-auto px-5 py-8">
+    <% if (status) { %>
+        <div class="mb-6 rounded-2xl bg-mangrove-50 border border-mangrove-100 p-4 text-sm text-mangrove-700 flex items-start gap-3 shadow-soft">
+            <span class="text-lg leading-none mt-0.5">✓</span>
+            <div class="flex-1 font-medium leading-relaxed">
+                <%= status %>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (errors && errors.length) { %>
+        <div class="mb-6 rounded-2xl bg-laterite-50 border border-laterite-100 p-4 text-sm text-laterite-700 flex items-start gap-3 shadow-soft">
+            <span class="text-lg leading-none mt-0.5">⚠️</span>
+            <div class="flex-1">
+                <p class="font-semibold mb-1">Atenção aos seguintes pontos:</p>
+                <ul class="list-disc pl-4 space-y-1 text-laterite-600 font-normal">
+                    <% errors.forEach(function(error) { %><li><%= error %></li><% }) %>
+                </ul>
+            </div>
+        </div>
+    <% } %>

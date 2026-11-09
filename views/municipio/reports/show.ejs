@@ -1,0 +1,91 @@
+<%- include('../../layouts/header') %>
+
+<a href="<%= url('/municipio/denuncias') %>" class="text-sm text-ink/50 hover:text-ink transition">&larr; Voltar</a>
+
+<div class="flex items-center gap-3 mt-3 mb-8">
+    <h1 class="font-display text-3xl font-semibold text-ink"><%= report.category_name %></h1>
+    <span class="text-xs font-medium px-2.5 py-1 rounded-full border <%= statusClasses(report.status) %>">
+        <%= statusLabel(report.status) %>
+    </span>
+</div>
+
+<div class="grid md:grid-cols-2 gap-10">
+    <div>
+        <% if (report.photo_path) { %>
+            <img src="<%= url(report.photo_path) %>" class="w-full rounded-xl border border-jacaranda-100 object-cover">
+        <% } %>
+
+        <p class="mt-4 text-sm text-ink/80 leading-relaxed"><%- nl2br(report.description) %></p>
+
+        <dl class="mt-6 text-sm text-ink/60 space-y-1.5">
+            <p><span class="font-medium text-ink/80">Cidadão:</span> <%= report.citizen_name %></p>
+            <p><span class="font-medium text-ink/80">Bairro:</span> <%= report.neighborhood || '—' %></p>
+            <p><span class="font-medium text-ink/80">Departamento:</span> <%= report.department_name || '—' %></p>
+            <p><span class="font-medium text-ink/80">Coordenadas:</span> <%= report.latitude %>, <%= report.longitude %></p>
+        </dl>
+    </div>
+
+    <div class="space-y-6">
+        <div class="border border-jacaranda-100 rounded-xl p-5 bg-white">
+            <h2 class="font-medium text-ink mb-3">Atribuir técnico</h2>
+            <% if (!technicians.length) { %>
+                <p class="text-sm text-ink/50">Não há técnicos configurados para este departamento.</p>
+            <% } else { %>
+                <form method="POST" action="<%= url('/municipio/denuncias/' + report.id + '/atribuir') %>" class="flex gap-2">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <select name="technician_id" required
+                            class="flex-1 rounded-lg border border-jacaranda-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jacaranda-300">
+                        <option value="">Escolher técnico</option>
+                        <% technicians.forEach(function(tech) { %>
+                            <option value="<%= tech.id %>" <%= report.technician_id === tech.id ? 'selected' : '' %>>
+                                <%= tech.name %>
+                            </option>
+                        <% }) %>
+                    </select>
+                    <button type="submit" class="rounded-full bg-jacaranda-600 text-white px-4 py-2 text-sm font-medium hover:bg-jacaranda-700 transition">
+                        Atribuir
+                    </button>
+                </form>
+            <% } %>
+        </div>
+
+        <div class="border border-jacaranda-100 rounded-xl p-5 bg-white">
+            <h2 class="font-medium text-ink mb-3">Alterar estado</h2>
+            <% if (!nextStates.length) { %>
+                <p class="text-sm text-ink/50">Este é um estado final — sem transições possíveis.</p>
+            <% } else { %>
+                <form method="POST" action="<%= url('/municipio/denuncias/' + report.id + '/estado') %>" class="space-y-3">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <select name="status" required
+                            class="w-full rounded-lg border border-jacaranda-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jacaranda-300">
+                        <% nextStates.forEach(function(next) { %>
+                            <option value="<%= next %>"><%= statusLabel(next) %></option>
+                        <% }) %>
+                    </select>
+                    <textarea name="response" rows="2" placeholder="Resposta ao cidadão (opcional)"
+                              class="w-full rounded-lg border border-jacaranda-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jacaranda-300"></textarea>
+                    <button type="submit" class="rounded-full bg-jacaranda-600 text-white px-4 py-2 text-sm font-medium hover:bg-jacaranda-700 transition">
+                        Actualizar estado
+                    </button>
+                </form>
+            <% } %>
+        </div>
+
+        <div>
+            <h2 class="font-medium text-ink mb-3">Histórico</h2>
+            <div class="space-y-4">
+                <% history.forEach(function(entry) { %>
+                    <div class="border-l-2 border-jacaranda-200 pl-4">
+                        <p class="text-sm font-medium text-ink"><%= statusLabel(entry.new_status) %></p>
+                        <p class="text-xs text-ink/40"><%= formatarData(entry.created_at) %> por <%= entry.changed_by_name %></p>
+                        <% if (entry.note) { %>
+                            <p class="mt-2 text-xs text-ink/70 rounded-lg bg-parchment/70 border border-jacaranda-50 p-2.5"><%- nl2br(entry.note) %></p>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../../layouts/footer') %>

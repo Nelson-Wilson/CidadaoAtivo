@@ -1,0 +1,179 @@
+<%- include('../layouts/header') %>
+
+<div class="mb-6 flex items-center gap-2 text-sm text-ink/50">
+    <a href="<%= url('/denuncias') %>" class="hover:text-jacaranda-600 transition">Denúncias</a>
+    <span>/</span>
+    <span class="text-ink font-medium">Nova Ocorrência</span>
+</div>
+
+<!-- Aviso de Segurança e Emergência Física (ISO/IEC 25010:2023 Safety) -->
+<div class="mb-8 rounded-2xl bg-laterite-50 border border-laterite-200/80 p-4 sm:p-5 text-sm text-laterite-700 flex items-start gap-3.5 shadow-soft">
+    <span class="text-2xl shrink-0">⚠️</span>
+    <div>
+        <strong class="font-bold text-laterite-800 text-sm sm:text-base block mb-0.5">Situação de emergência ou perigo de vida iminente?</strong>
+        <p class="text-xs sm:text-sm text-laterite-700 leading-relaxed">
+            Esta plataforma é destinada à manutenção e serviços públicos municipais. Em caso de cabos elétricos caídos em chamas, feridos graves ou perigo de desabamento, contacta de imediato o <strong>198 (Bombeiros)</strong> ou o <strong>112 (Polícia)</strong>.
+        </p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Formulário Principal em Cartões Estruturados -->
+    <div class="lg:col-span-2">
+        <form method="POST" action="<%= url('/denuncias') %>" enctype="multipart/form-data" class="space-y-6">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+            <!-- Passo 1: Fotografia -->
+            <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 sm:p-7 shadow-soft">
+                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-jacaranda-50">
+                    <span class="w-7 h-7 rounded-full bg-jacaranda-100 text-jacaranda-700 font-bold text-xs flex items-center justify-center">1</span>
+                    <h2 class="font-display text-lg font-semibold text-ink">Fotografia da Ocorrência</h2>
+                </div>
+                <p class="text-xs text-ink/60 mb-4">
+                    Tira uma foto clara do problema. A nossa inteligência artificial tentará identificar a categoria e a gravidade automaticamente.
+                </p>
+
+                <div class="border-2 border-dashed border-jacaranda-200/80 rounded-2xl p-5 text-center bg-jacaranda-50/20 hover:bg-jacaranda-50/40 transition">
+                    <input type="file" name="photo" id="photo" accept="image/*" capture="environment" required
+                           class="w-full text-sm text-ink/70 file:mr-4 file:rounded-full file:border-0 file:bg-jacaranda-600 file:text-white file:px-5 file:py-2.5 file:text-sm file:font-semibold hover:file:bg-jacaranda-700 cursor-pointer">
+                    <p id="photo-analyzing" class="hidden mt-3 text-xs text-jacaranda-600 font-medium animate-pulse">
+                        🔎 A IA está a analisar a tua fotografia...
+                    </p>
+                    <p id="photo-ai-note" class="hidden mt-3 text-xs bg-jacaranda-50 text-jacaranda-700 p-2.5 rounded-xl border border-jacaranda-100 text-left font-medium"></p>
+                </div>
+            </div>
+
+            <!-- Passo 2: O que aconteceu? -->
+            <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 sm:p-7 shadow-soft">
+                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-jacaranda-50">
+                    <span class="w-7 h-7 rounded-full bg-jacaranda-100 text-jacaranda-700 font-bold text-xs flex items-center justify-center">2</span>
+                    <h2 class="font-display text-lg font-semibold text-ink">Detalhes do Problema</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="category_id" class="block text-xs font-semibold text-ink/70 mb-1.5">
+                            Categoria <span class="text-laterite-500">*</span>
+                        </label>
+                        <select name="id_categoria" id="category_id" required
+                                class="w-full rounded-xl border border-jacaranda-100 bg-white px-3.5 py-2.5 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-jacaranda-300">
+                            <option value="">Escolhe a categoria do problema</option>
+                            <% categories.forEach(function(category) { %>
+                                <option value="<%= category.id %>" <%= String(old.id_categoria) === String(category.id) ? 'selected' : '' %>>
+                                    <%= category.name %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="description" class="block text-xs font-semibold text-ink/70">
+                                Descrição <span class="text-laterite-500">*</span>
+                            </label>
+                            <span class="text-[11px] text-ink/40">Mínimo 10 caracteres</span>
+                        </div>
+                        <textarea name="descricao" id="description" rows="3" required minlength="10"
+                                  placeholder="Explica o que está a acontecer, pontos de referência e se há perigo..."
+                                  class="w-full rounded-xl border border-jacaranda-100 px-3.5 py-2.5 text-sm text-ink/90 focus:outline-none focus:ring-2 focus:ring-jacaranda-300 placeholder:text-ink/30"><%= old.descricao || '' %></textarea>
+                        <p id="ai-suggestion" class="hidden mt-2 text-xs bg-jacaranda-50 text-jacaranda-700 p-2.5 rounded-xl border border-jacaranda-100 cursor-pointer hover:bg-jacaranda-100 transition"></p>
+                    </div>
+
+                    <!-- Aviso de Duplicados Próximos -->
+                    <div id="duplicate-warning" class="hidden rounded-2xl bg-baobab-50 border border-baobab-300/80 p-4">
+                        <div class="flex items-center gap-2 mb-2 text-baobab-500 font-semibold text-xs sm:text-sm">
+                            <span>💡</span>
+                            <span>Encontrámos problemas parecidos perto deste local:</span>
+                        </div>
+                        <div id="duplicate-list" class="space-y-2 mb-3"></div>
+                        <p class="text-[11px] text-baobab-500/80">
+                            Se a tua denúncia for diferente destas, continua normalmente e clica em enviar abaixo.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="neighborhood" class="block text-xs font-semibold text-ink/70 mb-1.5">
+                            Bairro ou Ponto de Referência <span class="text-ink/40 font-normal">(Opcional)</span>
+                        </label>
+                        <input type="text" name="bairro" id="neighborhood" value="<%= old.bairro || '' %>"
+                               placeholder="Ex.: Polana Cimento, Sommerchield, perto do mercado..."
+                               class="w-full rounded-xl border border-jacaranda-100 px-3.5 py-2.5 text-sm text-ink/90 focus:outline-none focus:ring-2 focus:ring-jacaranda-300 placeholder:text-ink/30">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 3: Onde aconteceu? -->
+            <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 sm:p-7 shadow-soft">
+                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-jacaranda-50">
+                    <span class="w-7 h-7 rounded-full bg-jacaranda-100 text-jacaranda-700 font-bold text-xs flex items-center justify-center">3</span>
+                    <h2 class="font-display text-lg font-semibold text-ink">Localização no Mapa</h2>
+                </div>
+                <p class="text-xs text-ink/60 mb-3">
+                    Tentamos obter a tua localização automática. <strong>Clica ou arrasta o pino no mapa</strong> para ajustar a posição exata.
+                </p>
+
+                <div id="location-picker" style="height: 320px;" class="rounded-2xl border border-jacaranda-100 shadow-inner overflow-hidden mb-3"></div>
+                <div class="flex items-center justify-between text-xs text-ink/60">
+                    <p id="location-status" class="flex items-center gap-1.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-jacaranda-500 animate-ping"></span>
+                        <span>A obter localização por GPS...</span>
+                    </p>
+                    <span class="text-[11px] text-ink/40 font-mono">Precisão GPS</span>
+                </div>
+
+                <input type="hidden" name="latitude" id="latitude" value="<%= old.latitude || '' %>" required>
+                <input type="hidden" name="longitude" id="longitude" value="<%= old.longitude || '' %>" required>
+            </div>
+
+            <!-- Submissão -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                <p class="text-xs text-ink/50 text-center sm:text-left">
+                    Ao enviar, a tua ocorrência entra diretamente no fluxo de triagem do Conselho Municipal.
+                </p>
+                <button type="submit"
+                        class="w-full sm:w-auto shrink-0 rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-8 py-3.5 font-semibold text-sm shadow-md hover:shadow-lg transition">
+                    Enviar Denúncia Oficial
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Barra Lateral de Apoio e Dicas -->
+    <div class="space-y-6">
+        <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+            <h3 class="font-display text-base font-semibold text-ink mb-3 flex items-center gap-2">
+                <span>💡</span>
+                <span>Dicas para uma boa denúncia</span>
+            </h3>
+            <ul class="space-y-3 text-xs text-ink/70 leading-relaxed">
+                <li class="flex items-start gap-2">
+                    <span class="text-mangrove-600 font-bold">✓</span>
+                    <span><strong>Foto nítida:</strong> Mostra o problema com clareza e um pouco da rua ao redor.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-mangrove-600 font-bold">✓</span>
+                    <span><strong>Localização precisa:</strong> Ajusta o pino no mapa se o GPS tiver algum desvio.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-mangrove-600 font-bold">✓</span>
+                    <span><strong>Contexto:</strong> Menciona referências como "em frente à farmácia" ou "cruzamento".</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="bg-jacaranda-50/60 border border-jacaranda-100 rounded-3xl p-6 text-xs text-jacaranda-800">
+            <h3 class="font-bold text-sm mb-2 flex items-center gap-2">
+                <span>🛡️</span>
+                <span>Garantia de Privacidade</span>
+            </h3>
+            <p class="leading-relaxed text-jacaranda-700">
+                Os teus dados pessoais (como email e palavra-passe) nunca são visíveis no mapa público. Apenas a foto do problema, descrição e coordenadas são partilhadas com os técnicos municipais.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="<%= url('vendor/leaflet/leaflet.js') %>"></script>
+<script src="<%= url('js/report-form.js') %>" defer></script>
+
+<%- include('../layouts/footer') %>

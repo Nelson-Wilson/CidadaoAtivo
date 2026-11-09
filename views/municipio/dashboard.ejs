@@ -1,0 +1,193 @@
+<%- include('../layouts/header') %>
+
+<div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+        <div class="flex items-center gap-2 mb-1">
+            <span class="px-2.5 py-0.5 rounded-full bg-jacaranda-100 text-jacaranda-700 font-semibold text-xs">Gestão Municipal</span>
+        </div>
+        <h1 class="font-display text-3xl font-bold text-ink">Painel de Controlo Urbano</h1>
+        <p class="text-sm text-ink/50">Visão integrada das ocorrências e desempenho das equipas no terreno.</p>
+    </div>
+    <div class="flex items-center gap-2 self-start sm:self-auto">
+        <a href="<%= url('/municipio/exportar.csv') %>"
+           class="rounded-full border border-jacaranda-200 bg-white hover:bg-jacaranda-50 text-jacaranda-700 px-4 py-2.5 text-xs font-semibold transition">
+            Exportar CSV
+        </a>
+        <a href="<%= url('/municipio/relatorio') %>"
+           class="rounded-full border border-jacaranda-200 bg-white hover:bg-jacaranda-50 text-jacaranda-700 px-4 py-2.5 text-xs font-semibold transition">
+            Relatório executivo
+        </a>
+        <a href="<%= url('/municipio/denuncias') %>"
+           class="rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-5 py-2.5 text-xs font-semibold shadow-xs transition">
+            Gerir Ocorrências →
+        </a>
+    </div>
+</div>
+
+<% if (smartSummary) { %>
+    <div class="mb-8 rounded-3xl bg-gradient-to-r from-jacaranda-50/90 to-white border border-jacaranda-100 p-6 shadow-soft flex items-start gap-4">
+        <div class="w-10 h-10 rounded-2xl bg-jacaranda-100 text-jacaranda-700 flex items-center justify-center text-xl shrink-0">
+            🤖
+        </div>
+        <div>
+            <h2 class="font-display text-base font-semibold text-jacaranda-800 mb-1">Boletim Executivo Municipal (IA)</h2>
+            <p class="text-xs sm:text-sm text-ink/80 leading-relaxed font-sans">
+                <%= smartSummary %>
+            </p>
+        </div>
+    </div>
+<% } %>
+
+<!-- Cartões de Indicadores (KPIs) -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 mb-8">
+    <div class="border border-jacaranda-100 rounded-2xl p-4 bg-white shadow-soft">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-ink/50 uppercase tracking-wider">Total</span>
+            <span class="text-xs">📊</span>
+        </div>
+        <p class="text-3xl font-bold text-ink tracking-tight"><%= stats.total %></p>
+        <p class="text-[11px] text-ink/40 mt-1">Registadas na plataforma</p>
+    </div>
+
+    <div class="border border-jacaranda-100 rounded-2xl p-4 bg-white shadow-soft">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-ink/50 uppercase tracking-wider">Hoje</span>
+            <span class="text-xs">⚡</span>
+        </div>
+        <p class="text-3xl font-bold text-jacaranda-600 tracking-tight"><%= stats.hoje %></p>
+        <p class="text-[11px] text-ink/40 mt-1">Últimas 24 horas</p>
+    </div>
+
+    <div class="border border-baobab-300/60 rounded-2xl p-4 bg-baobab-50/60 shadow-soft">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-baobab-500 uppercase tracking-wider">Pendentes</span>
+            <span class="text-xs">⏳</span>
+        </div>
+        <p class="text-3xl font-bold text-baobab-500 tracking-tight"><%= stats.pendentes %></p>
+        <p class="text-[11px] text-baobab-500/70 mt-1">Por analisar / atribuir</p>
+    </div>
+
+    <div class="border border-sky-200 rounded-2xl p-4 bg-sky-50/60 shadow-soft">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-sky-600 uppercase tracking-wider">Em curso</span>
+            <span class="text-xs">🛠️</span>
+        </div>
+        <p class="text-3xl font-bold text-sky-600 tracking-tight"><%= stats.em_execucao %></p>
+        <p class="text-[11px] text-sky-600/70 mt-1">Com técnicos no terreno</p>
+    </div>
+
+    <div class="border border-mangrove-100 rounded-2xl p-4 bg-mangrove-50/70 shadow-soft col-span-2 lg:col-span-1">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-mangrove-600 uppercase tracking-wider">Resolvidas</span>
+            <span class="text-xs">✓</span>
+        </div>
+        <p class="text-3xl font-bold text-mangrove-600 tracking-tight"><%= stats.resolvidas %></p>
+        <p class="text-[11px] text-mangrove-600/70 mt-1">Casos concluídos</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-8">
+    <div class="border border-laterite-100 rounded-2xl p-4 bg-laterite-50/60 shadow-soft">
+        <span class="text-xs font-semibold text-laterite-600 uppercase tracking-wider">Críticas abertas</span>
+        <p class="text-3xl font-bold text-laterite-600 tracking-tight mt-2"><%= stats.criticas %></p>
+        <p class="text-[11px] text-laterite-600/70 mt-1">Prioridade "muito urgente"</p>
+    </div>
+    <div class="border border-baobab-300/60 rounded-2xl p-4 bg-baobab-50/60 shadow-soft">
+        <span class="text-xs font-semibold text-baobab-500 uppercase tracking-wider">Fora do prazo (SLA)</span>
+        <p class="text-3xl font-bold text-baobab-500 tracking-tight mt-2"><%= stats.sla_atrasadas %></p>
+        <p class="text-[11px] text-baobab-500/70 mt-1">Abertas acima do prazo da categoria</p>
+    </div>
+    <div class="border border-jacaranda-100 rounded-2xl p-4 bg-white shadow-soft">
+        <span class="text-xs font-semibold text-ink/50 uppercase tracking-wider">Taxa de resolução</span>
+        <p class="text-3xl font-bold text-ink tracking-tight mt-2"><%= stats.taxa_resolucao %>%</p>
+        <p class="text-[11px] text-ink/40 mt-1">Resolvidas sobre o total</p>
+    </div>
+    <div class="border border-jacaranda-100 rounded-2xl p-4 bg-white shadow-soft">
+        <span class="text-xs font-semibold text-ink/50 uppercase tracking-wider">Satisfação dos munícipes</span>
+        <p class="text-3xl font-bold text-ink tracking-tight mt-2"><%= stats.satisfacao_media !== null ? stats.satisfacao_media + ' ★' : '—' %></p>
+        <p class="text-[11px] text-ink/40 mt-1"><%= stats.avaliacoes %> avaliações</p>
+    </div>
+</div>
+
+<div class="mb-8 bg-white border border-jacaranda-100 rounded-3xl p-5 shadow-soft flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <span class="text-2xl">⏱️</span>
+        <div>
+            <h3 class="text-xs font-semibold text-ink/50 uppercase tracking-wider">Tempo Médio de Atendimento</h3>
+            <p class="text-lg font-bold text-ink">
+                <%= stats.tempo_medio_horas !== null ? stats.tempo_medio_horas + ' horas (~' + (Math.round((stats.tempo_medio_horas/24)*10)/10) + ' dias)' : 'A recolher dados estatísticos' %>
+            </p>
+        </div>
+    </div>
+    <span class="text-xs text-ink/40 hidden sm:inline">Calculado com base nas denúncias concluídas</span>
+</div>
+
+<!-- Listas de Destaques: Categorias e Bairros -->
+<div class="grid md:grid-cols-2 gap-8 mb-8">
+    <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+        <h2 class="font-display text-base font-semibold text-ink mb-4 flex items-center gap-2">
+            <span>🏷️</span>
+            <span>Categorias Mais Frequentes</span>
+        </h2>
+        <% if (!topCategories.length) { %>
+            <p class="text-xs text-ink/40 py-6 text-center">Sem dados suficientes ainda.</p>
+        <% } else { %>
+            <div class="space-y-3">
+                <% topCategories.forEach(function(item) { %>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-ink/80"><%= item.name %></span>
+                            <span class="font-bold text-jacaranda-700"><%= item.total %></span>
+                        </div>
+                        <div class="w-full bg-jacaranda-50 rounded-full h-2 overflow-hidden">
+                            <% const pct = Math.min(100, Math.round((item.total / (stats.total || 1)) * 100)); %>
+                            <div class="bg-jacaranda-500 h-2 rounded-full" style="width: <%= pct %>%"></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+        <h2 class="font-display text-base font-semibold text-ink mb-4 flex items-center gap-2">
+            <span>📍</span>
+            <span>Bairros com Mais Ocorrências</span>
+        </h2>
+        <% if (!topNeighborhoods.length) { %>
+            <p class="text-xs text-ink/40 py-6 text-center">Sem dados suficientes ainda.</p>
+        <% } else { %>
+            <div class="space-y-3">
+                <% topNeighborhoods.forEach(function(item) { %>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-ink/80"><%= item.neighborhood %></span>
+                            <span class="font-bold text-baobab-500"><%= item.total %><% if (item.urgentes > 0) { %> <span class="text-laterite-600 font-semibold">· <%= item.urgentes %> urgentes</span><% } %></span>
+                        </div>
+                        <div class="w-full bg-baobab-50 rounded-full h-2 overflow-hidden">
+                            <% const pct = Math.min(100, Math.round((item.total / (stats.total || 1)) * 100)); %>
+                            <div class="bg-baobab-400 h-2 rounded-full" style="width: <%= pct %>%"></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Mapa de Calor -->
+<div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h2 class="font-display text-lg font-semibold text-ink">Mapa de Densidade Térmica (Heatmap)</h2>
+            <p class="text-xs text-ink/50 mt-0.5">Identifica manchas e zonas com maior concentração de problemas reportados.</p>
+        </div>
+    </div>
+    <div id="heatmap" style="height: 420px;" data-heat-points="<%= JSON.stringify(heatPoints.map(function(p) { return [parseFloat(p.latitude), parseFloat(p.longitude), 0.5]; })) %>" class="rounded-2xl border border-jacaranda-100 overflow-hidden shadow-inner"></div>
+</div>
+
+<script src="<%= url('vendor/leaflet/leaflet.js') %>"></script>
+<script src="<%= url('vendor/leaflet/leaflet-heat.js') %>"></script>
+<script src="<%= url('js/dashboard.js') %>" defer></script>
+
+<%- include('../layouts/footer') %>

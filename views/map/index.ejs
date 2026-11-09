@@ -1,0 +1,123 @@
+<%- include('../layouts/header') %>
+
+<!-- Seção Hero Cívica Acolhedora -->
+<div class="mb-10 bg-gradient-to-br from-jacaranda-50/80 via-white to-baobab-50/50 border border-jacaranda-100 rounded-3xl p-6 sm:p-10 shadow-soft">
+    <div class="max-w-2xl">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-jacaranda-100 text-jacaranda-700 text-xs font-semibold uppercase tracking-wider mb-4">
+            🇲🇿 Participação Cívica Digital
+        </span>
+        <h1 class="font-display text-3xl sm:text-4xl font-bold text-ink mb-3 tracking-tight leading-tight">
+            Ajuda a transformar e cuidar de Maputo.
+        </h1>
+        <p class="text-ink/70 text-base leading-relaxed mb-6">
+            Viste uma via danificada, poste apagado, fuga de água ou lixo acumulado?
+            Envia uma fotografia com localização e acompanha a resolução das equipas municipais em tempo real.
+        </p>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="<%= url('/denuncias/nova') %>"
+               class="inline-flex items-center gap-2 rounded-full bg-jacaranda-600 text-white px-6 py-3 font-semibold text-sm hover:bg-jacaranda-700 shadow-sm hover:shadow transition">
+                <span>📸</span>
+                <span>Reportar um problema agora</span>
+            </a>
+            <% if (!usuarioAtual) { %>
+                <a href="<%= url('/registar') %>"
+                   class="inline-flex items-center gap-2 rounded-full bg-white text-jacaranda-700 border border-jacaranda-200 px-5 py-3 font-medium text-sm hover:bg-jacaranda-50 transition">
+                    <span>Criar conta gratuita</span>
+                </a>
+            <% } else { %>
+                <a href="<%= url('/denuncias') %>"
+                   class="inline-flex items-center gap-2 rounded-full bg-white text-ink/70 border border-jacaranda-200 px-5 py-3 font-medium text-sm hover:bg-jacaranda-50 transition">
+                    <span>Minhas ocorrências</span>
+                </a>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- 3 Passos Simples -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-8 border-t border-jacaranda-100/60 text-sm">
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-jacaranda-100 text-jacaranda-700 flex items-center justify-center font-bold text-xs shrink-0">1</div>
+            <div>
+                <strong class="text-ink font-semibold block mb-0.5">Registo Rápido</strong>
+                <p class="text-xs text-ink/60">Tira uma fotografia e confirma o local exato com o GPS.</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-baobab-100 text-baobab-500 flex items-center justify-center font-bold text-xs shrink-0">2</div>
+            <div>
+                <strong class="text-ink font-semibold block mb-0.5">Triagem Inteligente</strong>
+                <p class="text-xs text-ink/60">A IA e o município encaminham o caso para o departamento responsável.</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-mangrove-100 text-mangrove-600 flex items-center justify-center font-bold text-xs shrink-0">3</div>
+            <div>
+                <strong class="text-ink font-semibold block mb-0.5">Resolução Comprovada</strong>
+                <p class="text-xs text-ink/60">O técnico repara o problema e publica a foto que comprova a solução.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secção do Mapa Interativo -->
+<div class="bg-white border border-jacaranda-100 rounded-3xl p-5 sm:p-7 shadow-soft">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+            <h2 class="font-display text-2xl font-semibold text-ink">Mapa de Ocorrências Urbanas</h2>
+            <p class="text-xs sm:text-sm text-ink/50 mt-0.5">Explora os problemas reportados em toda a cidade e o seu estado atual.</p>
+        </div>
+
+        <!-- Legenda Visual dos Marcadores -->
+        <div class="flex flex-wrap items-center gap-3 text-xs bg-parchment px-3.5 py-2 rounded-xl border border-jacaranda-100/80">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#a8a29e"></span>Recebida</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#C08C28"></span>Em análise</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#6C4F9E"></span>Atribuída</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#0284c7"></span>Em execução</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#2F7D68"></span>Resolvida</span>
+        </div>
+    </div>
+
+    <!-- Barra de Filtros -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+        <div>
+            <label for="filter-category" class="block text-xs font-semibold text-ink/70 mb-1">Filtrar por Categoria</label>
+            <select id="filter-category"
+                    class="w-full rounded-xl border border-jacaranda-100 bg-white px-3.5 py-2.5 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-jacaranda-300">
+                <option value="">Todas as categorias</option>
+                <% categories.forEach(function(category) { %>
+                    <option value="<%= category.id %>"><%= category.name %></option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div>
+            <label for="filter-status" class="block text-xs font-semibold text-ink/70 mb-1">Filtrar por Estado</label>
+            <select id="filter-status"
+                    class="w-full rounded-xl border border-jacaranda-100 bg-white px-3.5 py-2.5 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-jacaranda-300">
+                <option value="">Todos os estados</option>
+                <option value="recebida">Recebida</option>
+                <option value="em_analise">Em análise</option>
+                <option value="atribuida">Atribuída</option>
+                <option value="em_execucao">Em execução</option>
+                <option value="resolvida">Resolvida</option>
+                <option value="fechada">Fechada</option>
+            </select>
+        </div>
+
+        <div class="flex items-end">
+            <button id="btn-recenter" type="button"
+                    class="w-full rounded-xl border border-jacaranda-200 bg-jacaranda-50/60 hover:bg-jacaranda-100 px-4 py-2.5 text-sm font-medium text-jacaranda-700 transition flex items-center justify-center gap-2">
+                <span>🎯</span>
+                <span>Centrar em Maputo</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- O Mapa -->
+    <div id="reports-map" style="height: 520px;" class="border border-jacaranda-100 shadow-inner rounded-2xl overflow-hidden z-10"></div>
+</div>
+
+<script src="<%= url('vendor/leaflet/leaflet.js') %>"></script>
+<script src="<%= url('js/map.js') %>" defer></script>
+
+<%- include('../layouts/footer') %>

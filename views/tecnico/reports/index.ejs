@@ -1,0 +1,94 @@
+<%- include('../../layouts/header') %>
+
+<div class="mb-8">
+    <div class="flex items-center gap-2 mb-1">
+        <span class="px-2.5 py-0.5 rounded-full bg-jacaranda-100 text-jacaranda-700 font-semibold text-xs">Área Técnica</span>
+    </div>
+    <h1 class="font-display text-3xl font-bold text-ink mb-1">Painel de Tarefas</h1>
+    <p class="text-sm text-ink/50">Ocorrências atribuídas à tua equipa técnica para vistoria e intervenção no terreno.</p>
+</div>
+
+<div class="mb-6 flex items-center justify-between border-b border-jacaranda-100 pb-3">
+    <h2 class="font-display text-lg font-semibold text-ink flex items-center gap-2">
+        <span>🔧</span>
+        <span>Tarefas Ativas</span>
+        <span class="px-2 py-0.5 rounded-full bg-jacaranda-600 text-white text-xs font-bold"><%= reports.length %></span>
+    </h2>
+</div>
+
+<% if (!reports.length) { %>
+    <div class="text-center py-16 bg-white border border-dashed border-jacaranda-200 rounded-3xl p-8 mb-10 shadow-soft">
+        <div class="w-14 h-14 rounded-full bg-mangrove-50 text-mangrove-600 flex items-center justify-center text-2xl mx-auto mb-3">
+            ✓
+        </div>
+        <p class="text-ink/60 text-sm font-medium">Bom trabalho! Não tens tarefas pendentes de momento.</p>
+        <p class="text-xs text-ink/40 mt-1">Novas ocorrências atribuídas pelo município aparecerão aqui automaticamente.</p>
+    </div>
+<% } else { %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+        <% reports.forEach(function(report) { %>
+            <div class="bg-white rounded-3xl border border-jacaranda-100 p-5 shadow-soft hover:shadow-card transition flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-xs font-mono font-bold text-ink/40">#<%= report.id %></span>
+                        <div class="flex items-center gap-1.5">
+                            <% if (report.priority === 'muito_urgente' || report.priority === 'urgente') { %>
+                                <span class="px-2 py-0.5 rounded-full bg-laterite-50 text-laterite-600 border border-laterite-200 text-[11px] font-bold">
+                                    🚨 <%= report.priority.replace('_', ' ') %>
+                                </span>
+                            <% } %>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full border <%= statusClasses(report.status) %>">
+                                <%= statusLabel(report.status) %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <strong class="font-display text-base font-semibold text-ink block mb-1">
+                        <%= report.category_name %>
+                    </strong>
+
+                    <p class="text-xs text-ink/70 line-clamp-3 mb-4 leading-relaxed">
+                        <%= report.description %>
+                    </p>
+                </div>
+
+                <div class="pt-3 border-t border-jacaranda-50 flex items-center justify-between text-xs">
+                    <span class="text-ink/50 flex items-center gap-1">
+                        <span>📍</span>
+                        <span><%= report.neighborhood || 'Local indicado no mapa' %></span>
+                    </span>
+
+                    <a href="<%= url('/tecnico/tarefas/' + report.id) %>"
+                       class="rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-4 py-1.5 font-semibold text-xs shadow-xs transition">
+                        Ver detalhes & agir →
+                    </a>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+<% } %>
+
+<% if (historico && historico.length) { %>
+    <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
+        <h2 class="font-display text-base font-semibold text-ink mb-3 flex items-center gap-2">
+            <span>🎉</span>
+            <span>Concluídas Recentemente</span>
+        </h2>
+        <div class="divide-y divide-jacaranda-50">
+            <% historico.forEach(function(report) { %>
+                <div class="py-3 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-mangrove-600 font-bold">✓</span>
+                        <span class="font-medium text-ink">#<%= report.id %> · <%= report.category_name %></span>
+                        <span class="text-ink/40 hidden sm:inline">(Bairro: <%= report.neighborhood || 'Maputo' %>)</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full bg-mangrove-50 text-mangrove-600 font-medium">
+                        <%= statusLabel(report.status) %>
+                    </span>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+<% } %>
+
+<%- include('../../layouts/footer') %>

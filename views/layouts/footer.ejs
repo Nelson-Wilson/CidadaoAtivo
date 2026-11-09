@@ -1,0 +1,57 @@
+</main>
+
+<footer class="bg-white border-t border-jacaranda-100/80 mt-16 pt-12 pb-8">
+    <div class="max-w-6xl mx-auto px-5">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10 text-sm">
+            <div class="md:col-span-1">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xl">📍</span>
+                    <strong class="font-display text-lg font-bold text-jacaranda-700">Cidadão Ativo</strong>
+                </div>
+                <p class="text-xs text-ink/60 leading-relaxed">
+                    Plataforma oficial de reporte e acompanhamento de ocorrências urbanas em cooperação com o Conselho Municipal de Maputo.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="font-semibold text-ink text-xs uppercase tracking-wider mb-3 text-jacaranda-700">Acesso Rápido</h3>
+                <ul class="space-y-2 text-xs text-ink/70">
+                    <li><a href="<%= url('/') %>" class="hover:text-jacaranda-600 transition">Mapa de Ocorrências</a></li>
+                    <li><a href="<%= url('/denuncias/nova') %>" class="hover:text-jacaranda-600 transition">Registar Nova Ocorrência</a></li>
+                    <li><a href="<%= url('/denuncias') %>" class="hover:text-jacaranda-600 transition">Consultar Minhas Ocorrências</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold text-ink text-xs uppercase tracking-wider mb-3 text-jacaranda-700">Categorias Comuns</h3>
+                <ul class="space-y-2 text-xs text-ink/70">
+                    <li><span class="text-ink/60">Vias Públicas e Buracos</span></li>
+                    <li><span class="text-ink/60">Iluminação e Postes</span></li>
+                    <li><span class="text-ink/60">Saneamento e Resíduos</span></li>
+                    <li><span class="text-ink/60">Águas e Esgotos</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-semibold text-ink text-xs uppercase tracking-wider mb-3 text-jacaranda-700">Contactos de Socorro</h3>
+                <div class="space-y-2 text-xs text-ink/70">
+                    <p><strong class="text-laterite-600 font-semibold">198:</strong> Serviço Nacional de Salvação Pública (Bombeiros)</p>
+                    <p><strong class="text-laterite-600 font-semibold">112:</strong> Polícia da República de Moçambique</p>
+                    <p class="text-[11px] text-ink/50 mt-2">Dúvidas? Clica no assistente virtual no canto inferior direito.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-jacaranda-50 flex flex-col sm:flex-row items-center justify-between text-xs text-ink/40 gap-3">
+            <p>© <%= new Date().getFullYear() %> Cidadão Ativo · Cidade de Maputo, Moçambique. Todos os direitos reservados.</p>
+            <p>Construído para aproximar o cidadão da sua cidade.</p>
+        </div>
+    </div>
+</footer>
+
+<div id="chatbot-widget"></div>
+<script src="<%= url('js/ui.js') %>" defer></script>
+<script src="<%= url('js/chatbot.js') %>" defer></script>
+
+</body>
+</html>

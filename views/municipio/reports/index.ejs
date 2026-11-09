@@ -1,0 +1,145 @@
+<%- include('../../layouts/header') %>
+
+<div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+        <div class="flex items-center gap-2 mb-1">
+            <span class="px-2.5 py-0.5 rounded-full bg-jacaranda-100 text-jacaranda-700 font-semibold text-xs">Gestão Municipal</span>
+        </div>
+        <h1 class="font-display text-3xl font-bold text-ink mb-1">Gestão de Denúncias</h1>
+        <p class="text-sm text-ink/50">Triagem, atribuição de técnicos e supervisão das ocorrências municipais.</p>
+    </div>
+</div>
+
+<!-- Filtros de Pesquisa -->
+<div class="bg-white border border-jacaranda-100 rounded-3xl p-5 mb-6 shadow-soft">
+    <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+        <div>
+            <label class="block text-xs font-semibold text-ink/70 mb-1">Categoria</label>
+            <select name="id_categoria" data-auto-submit
+                    class="w-full rounded-xl border border-jacaranda-100 bg-white px-3.5 py-2.5 text-xs text-ink/80 focus:outline-none focus:ring-2 focus:ring-jacaranda-300">
+                <option value="">Todas as categorias</option>
+                <% categories.forEach(function(category) { %>
+                    <option value="<%= category.id %>" <%= String(filters.id_categoria) === String(category.id) ? 'selected' : '' %>>
+                        <%= category.name %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-ink/70 mb-1">Estado</label>
+            <select name="status" data-auto-submit
+                    class="w-full rounded-xl border border-jacaranda-100 bg-white px-3.5 py-2.5 text-xs text-ink/80 focus:outline-none focus:ring-2 focus:ring-jacaranda-300">
+                <option value="">Todos os estados</option>
+                <% ['recebida','em_analise','atribuida','em_execucao','resolvida','fechada','rejeitada'].forEach(function(s) { %>
+                    <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= statusLabel(s) %></option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-ink/70 mb-1">Bairro</label>
+            <input type="text" name="bairro" placeholder="Filtrar por bairro..." value="<%= filters.bairro || '' %>"
+                   class="w-full rounded-xl border border-jacaranda-100 px-3.5 py-2.5 text-xs text-ink/90 focus:outline-none focus:ring-2 focus:ring-jacaranda-300 placeholder:text-ink/30">
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="flex-1 rounded-xl bg-jacaranda-600 hover:bg-jacaranda-700 text-white py-2.5 text-xs font-semibold shadow-xs transition">
+                Filtrar
+            </button>
+            <% if (filters.id_categoria || filters.status || filters.bairro) { %>
+                <a href="<%= url('/municipio/denuncias') %>" class="rounded-xl border border-jacaranda-200 bg-white text-ink/60 hover:bg-jacaranda-50 px-3 py-2.5 text-xs font-medium transition flex items-center justify-center">
+                    Limpar
+                </a>
+            <% } %>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela de Ocorrências -->
+<% const lista = (typeof itens !== 'undefined' ? itens : (typeof items !== 'undefined' ? items : [])); %>
+
+<% if (!lista.length) { %>
+    <div class="text-center py-16 bg-white border border-dashed border-jacaranda-200 rounded-3xl p-8 shadow-soft">
+        <p class="text-ink/60 text-sm font-medium">Nenhuma ocorrência encontrada para os filtros selecionados.</p>
+        <a href="<%= url('/municipio/denuncias') %>" class="text-xs text-jacaranda-600 hover:underline mt-2 inline-block font-semibold">
+            Limpar todos os filtros →
+        </a>
+    </div>
+<% } else { %>
+    <div class="bg-white border border-jacaranda-100 rounded-3xl overflow-hidden shadow-soft">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-jacaranda-50/60 border-b border-jacaranda-100 text-ink/60 font-semibold uppercase tracking-wider text-[11px]">
+                        <th class="py-3.5 px-4">#ID</th>
+                        <th class="py-3.5 px-4">Categoria</th>
+                        <th class="py-3.5 px-4">Prioridade</th>
+                        <th class="py-3.5 px-4">Bairro</th>
+                        <th class="py-3.5 px-4">Estado</th>
+                        <th class="py-3.5 px-4">Técnico</th>
+                        <th class="py-3.5 px-4">Data</th>
+                        <th class="py-3.5 px-4 text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-jacaranda-50">
+                    <% lista.forEach(function(report) { %>
+                        <tr class="hover:bg-jacaranda-50/30 transition">
+                            <td class="py-3.5 px-4 font-mono font-bold text-ink/40">#<%= report.id %></td>
+                            <td class="py-3.5 px-4 font-semibold text-ink">
+                                <%= report.category_name %>
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <% if (report.priority === 'muito_urgente' || report.priority === 'urgente') { %>
+                                    <span class="px-2 py-0.5 rounded-full bg-laterite-50 text-laterite-600 font-bold border border-laterite-100 text-[10px]">
+                                        🚨 <%= report.priority.replace('_', ' ') %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="text-ink/40 text-[11px]"><%= report.priority %></span>
+                                <% } %>
+                            </td>
+                            <td class="py-3.5 px-4 text-ink/70"><%= report.neighborhood || 'Maputo' %></td>
+                            <td class="py-3.5 px-4">
+                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border <%= statusClasses(report.status) %>">
+                                    <%= statusLabel(report.status) %>
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-ink/60">
+                                <% if (report.technician_name) { %>
+                                    <%= report.technician_name %>
+                                <% } else { %>
+                                    <span class="text-ink/30 italic">Por atribuir</span>
+                                <% } %>
+                            </td>
+                            <td class="py-3.5 px-4 text-ink/40"><%= formatarData(report.created_at) %></td>
+                            <td class="py-3.5 px-4 text-right">
+                                <a href="<%= url('/municipio/denuncias/' + report.id) %>"
+                                   class="inline-flex items-center rounded-full bg-jacaranda-50 hover:bg-jacaranda-100 text-jacaranda-700 font-semibold px-3 py-1 transition">
+                                    Gerir →
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%
+        const curPage = typeof pagina !== 'undefined' ? pagina : (typeof page !== 'undefined' ? page : 1);
+        const perPg = typeof porPagina !== 'undefined' ? porPagina : (typeof perPage !== 'undefined' ? perPage : 15);
+        const totalPages = Math.ceil(total / perPg);
+    %>
+    <% if (totalPages > 1) { %>
+        <div class="mt-8 flex items-center justify-center gap-2 text-sm">
+            <% for (let p = 1; p <= totalPages; p++) { %>
+                <a href="<%= url('/municipio/denuncias?page=' + p + (filters.id_categoria ? '&id_categoria=' + filters.id_categoria : '') + (filters.status ? '&status=' + filters.status : '') + (filters.bairro ? '&bairro=' + filters.bairro : '')) %>"
+                   class="w-10 h-10 flex items-center justify-center rounded-2xl font-semibold <%= p === curPage ? 'bg-jacaranda-600 text-white shadow-sm' : 'bg-white border border-jacaranda-100 text-ink/70 hover:bg-jacaranda-50' %> transition">
+                    <%= p %>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+<% } %>
+
+<%- include('../../layouts/footer') %>
