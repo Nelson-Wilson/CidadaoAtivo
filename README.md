@@ -59,6 +59,7 @@ npm test
 
 A suite cobre 77 testes unitários e 31 de integração (108 no total): domínio, autorização, validação, prioridade, Gemini com `fetch` simulado, armazenamento Supabase, sessões revogáveis, rate limiting, pseudonimização de comentários e o fluxo completo cidadão → município → técnico → cidadão.
 Corre sem Supabase nem MySQL: os testes de integração usam um Postgres real em memória ([PGlite](https://pglite.dev)) com o mesmo `database/schema.sql`.
+O GitHub Actions corre `npm ci`, a compilação do Tailwind e a suite completa em cada push para `main` (`.github/workflows/ci.yml`).
 
 ## Publicar
 
