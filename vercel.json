@@ -7,11 +7,8 @@
       "maxDuration": 60
     }
   },
-  "redirects": [
-    { "source": "/", "destination": "/inicio", "permanent": false }
-  ],
   "rewrites": [
-    { "source": "/", "destination": "/api/index" },
+    { "source": "/", "destination": "/inicio" },
     { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
