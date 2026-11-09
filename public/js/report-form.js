@@ -11,9 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultCenter = [-25.9692, 32.5732]; // Maputo
 
     const map = L.map(mapEl).setView(defaultCenter, 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19,
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        maxZoom: 20,
     }).addTo(map);
 
     let marker = null;

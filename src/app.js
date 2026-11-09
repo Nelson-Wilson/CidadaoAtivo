@@ -59,8 +59,6 @@ function createApp({ sessionStore } = {}) {
                     "'self'",
                     'data:',
                     'blob:',
-                    'https://*.tile.openstreetmap.org',
-                    'https://tile.openstreetmap.org',
                     'https://server.arcgisonline.com',
                     'https://*.basemaps.cartocdn.com',
                     ...(origemSupabase ? [origemSupabase] : []),

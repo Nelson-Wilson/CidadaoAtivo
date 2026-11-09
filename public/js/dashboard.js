@@ -14,8 +14,10 @@
         }
 
         var mapa = L.map(el).setView([-25.9692, 32.5732], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            maxZoom: 20,
         }).addTo(mapa);
 
         if (pontos.length && typeof L.heatLayer === 'function') {
