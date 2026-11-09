@@ -42,6 +42,11 @@ router.get('/__diag_7f3a9c2e', async (req, res) => {
     res.json(saida);
 });
 
+router.get('/__diag_root_clone_7f3a9c2e', async (req, res) => {
+    const categorias = await Categoria.todas();
+    res.render('map/index', { title: 'Mapa de ocorrências', categories: categorias });
+});
+
 router.get('/__diag_send_7f3a9c2e', async (req, res) => {
     const categorias = await Categoria.todas();
     res.render('map/index', { title: 'Diagnostico', categories: categorias });

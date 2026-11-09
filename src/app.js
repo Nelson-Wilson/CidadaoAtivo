@@ -146,6 +146,7 @@ function createApp({ sessionStore } = {}) {
                 timestamp: new Date().toISOString(),
                 storage: config.storage.driver,
                 ai: config.ai.apiKey ? 'gemini' : 'off',
+                commit: process.env.VERCEL_GIT_COMMIT_SHA ? process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7) : 'local',
             });
         } catch (err) {
             res.status(503).json({ status: 'error', message: 'Falha na ligação à base de dados.' });
