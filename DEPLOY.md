@@ -16,6 +16,8 @@
 
 O `schema.sql` é idempotente: pode ser executado novamente para criar tabelas/colunas novas (`user_sessions`, `rate_limits`, notas de histórico/resolução).
 
+> Se o projeto já tinha uma versão anterior do schema, volte a executar `database/schema.sql` por completo. As instruções `CREATE TABLE IF NOT EXISTS` e `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` acrescentam apenas o que falta.
+
 ## 2. Dados iniciais (do seu computador)
 
 Crie um `.env` local com `DATABASE_URL`, `SESSION_SECRET` e, se quiser IA, `GEMINI_API_KEY`:
