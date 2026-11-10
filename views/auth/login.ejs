@@ -1,45 +1,71 @@
 <%- include('../layouts/header') %>
 
-<div class="max-w-md mx-auto py-10">
-    <div class="bg-white border border-jacaranda-100 rounded-3xl p-8 sm:p-10 shadow-soft">
-        <div class="text-center mb-8">
-            <div class="w-14 h-14 rounded-2xl bg-jacaranda-100 text-jacaranda-700 flex items-center justify-center text-2xl mx-auto mb-3 shadow-xs">
-                🔑
-            </div>
-            <h1 class="font-display text-2xl sm:text-3xl font-bold text-ink mb-1.5">Entrar na tua conta</h1>
-            <p class="text-xs sm:text-sm text-ink/50">Acede para reportar problemas e acompanhar o progresso em Maputo.</p>
+<div class="mx-auto grid max-w-4xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900 md:grid-cols-2">
+    <!-- Painel de marca -->
+    <aside class="relative hidden overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 text-white md:flex md:flex-col md:justify-between">
+        <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="pointer-events-none absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-sky-400/20 blur-3xl"></div>
+
+        <div class="relative">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            </span>
+            <h2 class="mt-4 font-display text-2xl font-bold leading-tight">A tua cidade,<br>mais perto de ti.</h2>
+            <p class="mt-2 text-sm leading-relaxed text-blue-100/90">
+                Entra para reportar problemas, acompanhar denúncias e ver a intervenção municipal em tempo real.
+            </p>
         </div>
 
-        <form method="POST" action="<%= url('/login') %>" class="space-y-5">
+        <ul class="relative mt-8 space-y-3 text-xs text-blue-50/90">
+            <li class="flex items-center gap-2">
+                <svg class="h-4 w-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Registo com fotografia e GPS
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="h-4 w-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Acompanhamento por estado
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="h-4 w-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Mapas e indicadores públicos
+            </li>
+        </ul>
+
+        <p class="relative mt-8 text-[10px] text-blue-100/60">Conselho Municipal de Maputo · Cidadão Ativo</p>
+    </aside>
+
+    <!-- Formulário -->
+    <div class="p-6 sm:p-9">
+        <div class="mb-6">
+            <span class="ca-eyebrow">Bem-vindo de volta</span>
+            <h1 class="font-display text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Entrar na tua conta</h1>
+            <p class="ca-muted mt-1">Usa o email e a palavra-passe com que te registaste.</p>
+        </div>
+
+        <form method="POST" action="<%= url('/login') %>" class="space-y-4">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
             <div>
-                <label for="email" class="block text-xs font-semibold text-ink/70 mb-1.5">Endereço de Email</label>
+                <label for="email" class="ca-label">Email</label>
                 <input type="email" name="email" id="email" value="<%= old.email || '' %>" required autocomplete="email"
-                       placeholder="exemplo@dominio.co.mz"
-                       class="w-full rounded-xl border border-jacaranda-100 px-4 py-2.5 text-sm text-ink/90 focus:outline-none focus:ring-2 focus:ring-jacaranda-300 placeholder:text-ink/30 transition">
+                       placeholder="exemplo@dominio.co.mz" class="ca-input">
             </div>
 
             <div>
-                <div class="flex items-center justify-between mb-1.5">
-                    <label for="password" class="block text-xs font-semibold text-ink/70">Palavra-passe</label>
-                </div>
+                <label for="password" class="ca-label">Palavra-passe</label>
                 <input type="password" name="senha" id="password" required autocomplete="current-password"
-                       placeholder="••••••••"
-                       class="w-full rounded-xl border border-jacaranda-100 px-4 py-2.5 text-sm text-ink/90 focus:outline-none focus:ring-2 focus:ring-jacaranda-300 placeholder:text-ink/30 transition">
+                       placeholder="••••••••" class="ca-input">
             </div>
 
-            <button type="submit"
-                    class="w-full rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white py-3 text-sm font-semibold shadow-md hover:shadow-lg transition">
-                Entrar no Cidadão Ativo
+            <button type="submit" class="ca-btn-primary w-full">
+                Entrar
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12l-7.5 7.5M21 12H3"/></svg>
             </button>
         </form>
 
-        <div class="mt-8 pt-6 border-t border-jacaranda-50 text-center">
-            <p class="text-xs text-ink/60">
-                Ainda não tens uma conta?
-                <a href="<%= url('/registar') %>" class="text-jacaranda-600 font-semibold hover:underline ml-1">Cria a tua conta aqui</a>.
-            </p>
+        <div class="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            Ainda não tens conta?
+            <a href="<%= url('/registar') %>" class="ca-link ml-1">Criar conta gratuita</a>
         </div>
     </div>
 </div>

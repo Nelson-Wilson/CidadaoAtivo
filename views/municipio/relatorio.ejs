@@ -1,31 +1,137 @@
 <%- include('../layouts/header') %>
 
-<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
-    <a href="<%= url('/municipio/dashboard') %>" class="text-sm text-ink/50 hover:text-jacaranda-600 transition">← Voltar ao painel</a>
-    <button type="button" data-print class="self-start rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-5 py-2.5 text-xs font-semibold transition">Imprimir / guardar PDF</button>
-</div>
+<nav class="mb-5 flex items-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500 print:hidden" aria-label="Navegação estrutural">
+    <a href="<%= url('/municipio/dashboard') %>" class="inline-flex items-center gap-1 transition hover:text-blue-600 dark:hover:text-blue-400">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+        Painel de controlo
+    </a>
+    <span aria-hidden="true">/</span>
+    <span class="text-slate-700 dark:text-slate-200">Relatório executivo</span>
+</nav>
 
-<article class="bg-white border border-jacaranda-100 rounded-3xl p-8 shadow-soft max-w-3xl">
-    <p class="text-xs uppercase tracking-wider text-ink/40 mb-1">Gerado em <%= formatarData(generatedAt) %> · <%= report.fonte === 'ia' ? 'redigido com IA a partir dos dados reais' : 'gerado automaticamente a partir dos dados' %></p>
-    <h1 class="font-display text-3xl font-bold text-ink mb-4"><%= report.titulo %></h1>
-    <p class="text-base text-ink/80 leading-relaxed mb-6"><%= report.resumo %></p>
+<header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between print:hidden">
+    <div>
+        <span class="ca-eyebrow">Gestão municipal</span>
+        <h1 class="ca-page-title mt-1">Relatório executivo</h1>
+        <p class="ca-muted mt-1">
+            Síntese gerada a <%= formatDateTime(generatedAt) %>
+            <% if (report.fonte === 'ia') { %>
+                · <span class="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300">✨ Redigido com IA</span>
+            <% } else { %>
+                · <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">Dados reais</span>
+            <% } %>
+        </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+        <a href="<%= url('/municipio/exportar.csv') %>" class="ca-btn-secondary text-xs">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            Exportar CSV
+        </a>
+        <button type="button" data-print class="ca-btn-primary">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/></svg>
+            Imprimir / guardar PDF
+        </button>
+    </div>
+</header>
 
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-center">
-        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.total %></p><p class="text-[11px] text-ink/50">Ocorrências</p></div>
-        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.taxa_resolucao %>%</p><p class="text-[11px] text-ink/50">Resolvidas</p></div>
-        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.sla_atrasadas %></p><p class="text-[11px] text-ink/50">Fora do SLA</p></div>
-        <div class="rounded-2xl border border-jacaranda-100 p-3"><p class="text-2xl font-bold"><%= stats.satisfacao_media !== null ? stats.satisfacao_media : '—' %></p><p class="text-[11px] text-ink/50">Satisfação (de 5)</p></div>
+<article class="ca-card mx-auto max-w-3xl p-6 sm:p-8 print:max-w-none print:border-0 print:p-0 print:shadow-none">
+    <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">Gerado em <%= formatDate(generatedAt) %> · <%= report.fonte === 'ia' ? 'redigido com IA a partir dos dados reais' : 'gerado automaticamente a partir dos dados' %></p>
+    <h2 class="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl"><%= report.titulo %></h2>
+    <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base"><%= report.resumo %></p>
+
+    <div class="mt-7 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-700 dark:bg-slate-900/60">
+            <p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white"><%= stats.total %></p>
+            <p class="mt-0.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">Ocorrências</p>
+        </div>
+        <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+            <p class="text-2xl font-bold tracking-tight text-emerald-700 dark:text-emerald-300"><%= stats.taxa_resolucao %>%</p>
+            <p class="mt-0.5 text-[11px] font-medium text-emerald-700/70 dark:text-emerald-400/80">Resolvidas</p>
+        </div>
+        <div class="rounded-2xl border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-900 dark:bg-amber-950/30">
+            <p class="text-2xl font-bold tracking-tight text-amber-700 dark:text-amber-300"><%= stats.sla_atrasadas %></p>
+            <p class="mt-0.5 text-[11px] font-medium text-amber-700/70 dark:text-amber-400/80">Fora do SLA</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-700 dark:bg-slate-900/60">
+            <p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                <%= stats.satisfacao_media !== null ? stats.satisfacao_media : '—' %>
+                <% if (stats.satisfacao_media !== null) { %><span class="text-sm text-amber-500">★</span><% } %>
+            </p>
+            <p class="mt-0.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">Satisfação (de 5)</p>
+        </div>
     </div>
 
-    <h2 class="font-display text-lg font-semibold text-ink mb-2">Destaques</h2>
-    <ul class="list-disc pl-5 space-y-1.5 text-sm text-ink/80 mb-6">
-        <% report.destaques.forEach(function(d) { %><li><%= d %></li><% }) %>
-    </ul>
+    <section class="mt-8">
+        <h3 class="flex items-center gap-2 font-display text-base font-bold text-slate-900 dark:text-white">
+            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.004 12.004 0 0116.772 5.25"/></svg>
+            </span>
+            Destaques
+        </h3>
+        <ul class="mt-3 space-y-2">
+            <% report.destaques.forEach(function(d) { %>
+                <li class="flex items-start gap-2.5 rounded-xl border border-slate-100 bg-slate-50/60 p-3 text-sm leading-relaxed text-slate-700 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    </span>
+                    <%= d %>
+                </li>
+            <% }) %>
+        </ul>
+    </section>
 
-    <h2 class="font-display text-lg font-semibold text-ink mb-2">Recomendações</h2>
-    <ol class="list-decimal pl-5 space-y-1.5 text-sm text-ink/80">
-        <% report.recomendacoes.forEach(function(r) { %><li><%= r %></li><% }) %>
-    </ol>
+    <section class="mt-8">
+        <h3 class="flex items-center gap-2 font-display text-base font-bold text-slate-900 dark:text-white">
+            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
+            </span>
+            Recomendações
+        </h3>
+        <ol class="mt-3 space-y-2">
+            <% report.recomendacoes.forEach(function(r, idx) { %>
+                <li class="flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50/50 p-3 text-sm leading-relaxed text-slate-700 dark:border-emerald-900/70 dark:bg-emerald-950/20 dark:text-slate-300">
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-bold text-white"><%= idx + 1 %></span>
+                    <%= r %>
+                </li>
+            <% }) %>
+        </ol>
+    </section>
+
+    <% if ((topCategories && topCategories.length) || (topNeighborhoods && topNeighborhoods.length)) { %>
+        <section class="mt-8 grid gap-4 sm:grid-cols-2">
+            <% if (topCategories && topCategories.length) { %>
+                <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+                    <h4 class="ca-eyebrow mb-3">Categorias principais</h4>
+                    <ul class="space-y-2">
+                        <% topCategories.forEach(function(item) { %>
+                            <li class="flex items-center justify-between gap-2 text-xs">
+                                <span class="truncate font-medium text-slate-700 dark:text-slate-300"><%= item.name %></span>
+                                <span class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><%= item.total %></span>
+                            </li>
+                        <% }) %>
+                    </ul>
+                </div>
+            <% } %>
+            <% if (topNeighborhoods && topNeighborhoods.length) { %>
+                <div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+                    <h4 class="ca-eyebrow mb-3">Bairros principais</h4>
+                    <ul class="space-y-2">
+                        <% topNeighborhoods.forEach(function(item) { %>
+                            <li class="flex items-center justify-between gap-2 text-xs">
+                                <span class="truncate font-medium text-slate-700 dark:text-slate-300"><%= item.neighborhood %></span>
+                                <span class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><%= item.total %></span>
+                            </li>
+                        <% }) %>
+                    </ul>
+                </div>
+            <% } %>
+        </section>
+    <% } %>
+
+    <p class="mt-8 border-t border-slate-100 pt-4 text-[10px] leading-relaxed text-slate-400 dark:border-slate-800 dark:text-slate-500">
+        Relatório gerado automaticamente pelo Cidadão Ativo a partir das ocorrências registadas no município.
+        <% if (report.fonte === 'ia') { %>A narrativa foi redigida com apoio de IA; os números são os dados reais do sistema.<% } %>
+    </p>
 </article>
 
 <%- include('../layouts/footer') %>

@@ -1,71 +1,86 @@
 <%- include('../layouts/header') %>
 
-<div class="mb-6">
-    <h1 class="font-display text-3xl font-bold text-ink">Administração</h1>
-    <p class="text-sm text-ink/50">Categorias de ocorrências, departamento responsável e prazo padrão de resolução (SLA).</p>
-</div>
+<header class="mb-6">
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-blue-700 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Administração
+    </span>
+    <h1 class="ca-page-title mt-2">Categorias e prazos de resolução</h1>
+    <p class="ca-muted mt-1">Define o departamento responsável e o SLA de cada tipo de ocorrência.</p>
+</header>
 <%- include('_tabs', { tab: tab }) %>
 
-<div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft mb-8 overflow-x-auto">
-    <table class="w-full text-left text-sm">
-        <thead>
-            <tr class="text-xs uppercase tracking-wider text-ink/40 border-b border-jacaranda-100">
-                <th class="py-2 pr-3">Categoria</th><th class="py-2 pr-3">Departamento</th><th class="py-2 pr-3">SLA (horas)</th><th class="py-2 pr-3">Denúncias</th><th class="py-2"></th>
-            </tr>
-        </thead>
-        <tbody>
-        <% categories.forEach(function(c) { %>
-            <tr class="border-b border-jacaranda-50 align-middle">
-                <td class="py-2 pr-3">
-                    <form method="POST" action="<%= url('/admin/categorias/' + c.id) %>" id="cat-<%= c.id %>">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    </form>
-                    <input form="cat-<%= c.id %>" name="name" value="<%= c.name %>" required maxlength="80" class="w-full rounded-xl border border-jacaranda-100 px-3 py-1.5 text-sm"></td>
-                <td class="py-2 pr-3">
-                    <select form="cat-<%= c.id %>" name="department_id" class="rounded-xl border border-jacaranda-100 px-3 py-1.5 text-sm">
-                        <option value="">— sem departamento —</option>
-                        <% departments.forEach(function(d) { %>
-                            <option value="<%= d.id %>" <%= Number(c.department_id) === Number(d.id) ? 'selected' : '' %>><%= d.municipality_name %> · <%= d.name %></option>
-                        <% }) %>
-                    </select>
-                </td>
-                <td class="py-2 pr-3"><input form="cat-<%= c.id %>" type="number" name="sla_hours" value="<%= c.sla_hours %>" min="1" max="2160" required class="w-24 rounded-xl border border-jacaranda-100 px-3 py-1.5 text-sm"></td>
-                <td class="py-2 pr-3 text-ink/60"><%= c.reports_count %></td>
-                <td class="py-2 text-right whitespace-nowrap">
-                    <button form="cat-<%= c.id %>" type="submit" class="rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-4 py-1.5 text-xs font-semibold">Guardar</button>
-                    <% if (Number(c.reports_count) === 0) { %>
-                        <form method="POST" action="<%= url('/admin/categorias/' + c.id + '/remover') %>" class="inline" data-confirm="Remover esta categoria?">
+<div class="ca-card mb-6 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="ca-table">
+            <thead>
+                <tr>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Departamento</th>
+                    <th scope="col">SLA (horas)</th>
+                    <th scope="col">Denúncias</th>
+                    <th scope="col" class="text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% categories.forEach(function(c) { %>
+                <tr>
+                    <td>
+                        <form method="POST" action="<%= url('/admin/categorias/' + c.id) %>" id="cat-<%= c.id %>">
                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <button type="submit" class="rounded-full border border-laterite-100 text-laterite-600 hover:bg-laterite-50 px-4 py-1.5 text-xs font-semibold">Remover</button>
                         </form>
-                    <% } %>
-                </td>
-            </tr>
-        <% }) %>
-        </tbody>
-    </table>
+                        <input form="cat-<%= c.id %>" name="name" value="<%= c.name %>" required maxlength="80"
+                               class="ca-input py-1.5 text-xs" aria-label="Nome da categoria <%= c.name %>">
+                    </td>
+                    <td>
+                        <select form="cat-<%= c.id %>" name="department_id" class="ca-input py-1.5 text-xs" aria-label="Departamento da categoria <%= c.name %>">
+                            <option value="">— sem departamento —</option>
+                            <% departments.forEach(function(d) { %>
+                                <option value="<%= d.id %>" <%= Number(c.department_id) === Number(d.id) ? 'selected' : '' %>><%= d.municipality_name %> · <%= d.name %></option>
+                            <% }) %>
+                        </select>
+                    </td>
+                    <td>
+                        <input form="cat-<%= c.id %>" type="number" name="sla_hours" value="<%= c.sla_hours %>" min="1" max="2160" required
+                               class="ca-input w-24 py-1.5 text-xs" aria-label="SLA em horas de <%= c.name %>">
+                    </td>
+                    <td class="text-xs text-slate-500 dark:text-slate-400"><%= c.reports_count %></td>
+                    <td class="whitespace-nowrap text-right">
+                        <button form="cat-<%= c.id %>" type="submit" class="ca-btn-primary px-3 py-1.5 text-xs">Guardar</button>
+                        <% if (Number(c.reports_count) === 0) { %>
+                            <form method="POST" action="<%= url('/admin/categorias/' + c.id + '/remover') %>" class="inline" data-confirm="Remover esta categoria?">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button type="submit" class="ca-btn-secondary px-3 py-1.5 text-xs text-rose-600 hover:border-rose-200 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40">Remover</button>
+                            </form>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
-    <h2 class="font-display text-lg font-semibold text-ink mb-4">Nova categoria</h2>
-    <form method="POST" action="<%= url('/admin/categorias') %>" class="grid sm:grid-cols-4 gap-4 items-end">
+<div class="ca-card ca-card-pad">
+    <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">Nova categoria</h2>
+    <form method="POST" action="<%= url('/admin/categorias') %>" class="mt-4 grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <div class="sm:col-span-1">
-            <label for="n-name" class="text-xs font-semibold text-ink/60 block mb-1">Nome</label>
-            <input id="n-name" name="name" required maxlength="80" value="<%= old.name || '' %>" placeholder="Ex.: Sinalização danificada" class="w-full rounded-xl border border-jacaranda-100 px-3 py-2 text-sm">
+        <div>
+            <label for="n-name" class="ca-label">Nome</label>
+            <input id="n-name" name="name" required maxlength="80" value="<%= old.name || '' %>" placeholder="Ex.: Sinalização danificada" class="ca-input">
         </div>
         <div>
-            <label for="n-dep" class="text-xs font-semibold text-ink/60 block mb-1">Departamento responsável</label>
-            <select id="n-dep" name="department_id" class="w-full rounded-xl border border-jacaranda-100 px-3 py-2 text-sm">
+            <label for="n-dep" class="ca-label">Departamento responsável</label>
+            <select id="n-dep" name="department_id" class="ca-input">
                 <option value="">— sem departamento —</option>
                 <% departments.forEach(function(d) { %><option value="<%= d.id %>"><%= d.municipality_name %> · <%= d.name %></option><% }) %>
             </select>
         </div>
         <div>
-            <label for="n-sla" class="text-xs font-semibold text-ink/60 block mb-1">Prazo SLA (horas)</label>
-            <input id="n-sla" type="number" name="sla_hours" min="1" max="2160" value="<%= old.sla_hours || 72 %>" required class="w-full rounded-xl border border-jacaranda-100 px-3 py-2 text-sm">
+            <label for="n-sla" class="ca-label">Prazo SLA (horas)</label>
+            <input id="n-sla" type="number" name="sla_hours" min="1" max="2160" value="<%= old.sla_hours || 72 %>" required class="ca-input">
         </div>
-        <button type="submit" class="rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-6 py-2.5 text-sm font-semibold transition">Criar categoria</button>
+        <button type="submit" class="ca-btn-primary">Criar categoria</button>
     </form>
 </div>
 

@@ -1,123 +1,209 @@
 <%- include('../layouts/header') %>
 
-<div class="mb-6 flex items-center gap-2 text-sm text-ink/50">
-    <a href="<%= url('/') %>" class="hover:text-jacaranda-600 transition flex items-center gap-1">
-        <span>←</span><span>Voltar ao mapa</span>
+<nav class="mb-5 flex items-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500" aria-label="Navegação estrutural">
+    <a href="<%= url('/inicio') %>" class="inline-flex items-center gap-1 transition hover:text-blue-600 dark:hover:text-blue-400">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+        Mapa de ocorrências
     </a>
-</div>
-
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-    <div>
-        <div class="flex items-center gap-3 flex-wrap">
-            <span class="text-sm font-mono text-ink/40 font-bold">#<%= report.id %></span>
-            <h1 class="font-display text-2xl sm:text-3xl font-bold text-ink"><%= report.category_name %></h1>
-            <span class="text-xs font-semibold px-3 py-1 rounded-full border <%= prioridadeClasses(report.priority) %>"><%= prioridadeLabel(report.priority) %></span>
-        </div>
-        <p class="text-xs sm:text-sm text-ink/50 mt-1">Reportada em <%= formatarData(report.created_at) %> · bairro <%= report.neighborhood || 'Maputo' %> · <%= report.department_name || 'a aguardar triagem' %></p>
-    </div>
-    <span class="self-start sm:self-auto text-sm font-semibold px-4 py-1.5 rounded-full border <%= statusClasses(report.status) %> shadow-xs">
-        <%= statusLabel(report.status) %>
-    </span>
-</div>
+    <span aria-hidden="true">/</span>
+    <span class="text-slate-700 dark:text-slate-200">Ocorrência #<%= report.id %></span>
+</nav>
 
 <% const podeVerNotas = isAuthor || Boolean(usuarioAtual && ['municipio', 'tecnico', 'admin'].includes(usuarioAtual.role)); %>
 
-<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-    <div class="lg:col-span-3 space-y-6">
-        <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
-            <% if (report.photo_path) { %>
-                <img src="<%= url(report.photo_path) %>" alt="Fotografia da ocorrência"
-                     class="w-full max-h-96 rounded-2xl border border-jacaranda-100 object-cover mb-4">
+<header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="font-mono text-xs font-bold text-slate-400 dark:text-slate-500">#<%= report.id %></span>
+            <span class="ca-badge <%= statusClasses(report.status) %>"><%= statusLabel(report.status) %></span>
+            <span class="ca-badge <%= priorityClasses(report.priority) %>"><%= priorityLabel(report.priority) %></span>
+            <% if (typeof rating !== 'undefined' && rating) { %>
+                <span class="ca-badge border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300" aria-label="Avaliação <%= rating.score %> de 5">
+                    <%= '★'.repeat(rating.score) %><span class="opacity-40"><%= '★'.repeat(5 - rating.score) %></span>
+                </span>
             <% } %>
-            <p class="text-sm text-ink/90 leading-relaxed mb-5"><%- nl2br(report.description) %></p>
+        </div>
+        <h1 class="ca-page-title mt-2"><%= report.category_name %></h1>
+        <p class="ca-muted mt-1">
+            Reportada a <%= formatDateTime(report.created_at) %>
+            · Bairro <%= report.neighborhood || 'não indicado' %>
+            · <%= report.department_name || 'a aguardar triagem' %>
+        </p>
+    </div>
 
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="text-sm text-ink/70">👍 <strong id="votes-count"><%= report.votes_count %></strong> confirmações</span>
+    <a href="https://www.openstreetmap.org/?mlat=<%= report.latitude %>&mlon=<%= report.longitude %>#map=18"
+       target="_blank" rel="noopener noreferrer" class="ca-btn-secondary self-start">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+        Abrir no mapa
+    </a>
+</header>
+
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+    <div class="space-y-6 lg:col-span-3">
+        <!-- Registo -->
+        <section class="ca-card ca-card-pad">
+            <% if (report.photo_path) { %>
+                <img src="<%= url(report.photo_path) %>" alt="Fotografia da ocorrência <%= report.category_name %>" loading="lazy"
+                     class="max-h-96 w-full rounded-xl border border-slate-200 object-cover dark:border-slate-700">
+            <% } %>
+
+            <div class="<%= report.photo_path ? 'mt-4' : '' %> rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                <p class="ca-eyebrow mb-1">Descrição do cidadão</p>
+                <p class="whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-300"><%- nl2br(report.description) %></p>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                    <span aria-hidden="true">👍</span>
+                    <strong id="votes-count" class="font-bold text-slate-800 dark:text-slate-100"><%= report.votes_count %></strong>
+                    confirmações
+                </span>
+
                 <% if (canVote && !isAuthor) { %>
                     <form method="POST" action="<%= url('/ocorrencias/' + report.id + '/votar') %>" class="inline">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <button type="submit"
-                                class="rounded-full px-5 py-2 text-sm font-semibold transition <%= hasVoted ? 'bg-jacaranda-600 text-white hover:bg-jacaranda-700' : 'border border-jacaranda-200 text-jacaranda-700 bg-white hover:bg-jacaranda-50' %>">
+                                class="<%= hasVoted ? 'ca-btn-primary' : 'ca-btn-secondary' %>">
                             <%= hasVoted ? '✓ Também me afeta (retirar)' : 'Também me afeta' %>
                         </button>
                     </form>
                 <% } else if (!usuarioAtual) { %>
-                    <a href="<%= url('/login') %>" class="text-sm text-jacaranda-600 font-semibold hover:underline">Entra para apoiar esta ocorrência</a>
+                    <a href="<%= url('/login') %>" class="ca-link text-xs">Entra para apoiar esta ocorrência →</a>
                 <% } else if (isAuthor) { %>
-                    <span class="text-xs text-ink/40">Foste tu que reportaste esta ocorrência.</span>
+                    <span class="text-[11px] text-slate-400 dark:text-slate-500">Foste tu que reportaste esta ocorrência.</span>
                 <% } %>
-                <a href="https://www.openstreetmap.org/?mlat=<%= report.latitude %>&mlon=<%= report.longitude %>#map=18"
-                   target="_blank" rel="noopener" class="text-sm text-jacaranda-600 font-semibold hover:underline">Abrir mapa ↗</a>
             </div>
-            <% if (typeof rating !== 'undefined' && rating) { %>
-                <p class="mt-4 text-sm text-ink/60">Avaliação do cidadão: <span class="text-baobab-400"><%= '★'.repeat(rating.score) %></span><span class="text-ink/20"><%= '★'.repeat(5 - rating.score) %></span></p>
-            <% } %>
 
-            <% if (report.resolution_photo) { %>
-                <div class="mt-5 rounded-2xl border border-mangrove-100 bg-mangrove-50/50 p-4">
-                    <h2 class="text-xs font-semibold uppercase tracking-wider text-mangrove-700 mb-2">Resolução</h2>
-                    <img src="<%= url(report.resolution_photo) %>" alt="Fotografia da resolução"
-                         class="w-full max-h-72 rounded-xl border border-mangrove-100 object-cover">
+            <% if (report.resolution_photo || (podeVerNotas && report.resolution_note)) { %>
+                <div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                    <p class="ca-eyebrow mb-2 text-emerald-700 dark:text-emerald-300">Resolução</p>
+                    <% if (report.resolution_photo) { %>
+                        <img src="<%= url(report.resolution_photo) %>" alt="Fotografia da resolução" loading="lazy"
+                             class="max-h-72 w-full rounded-xl border border-emerald-200 object-cover dark:border-emerald-900">
+                    <% } %>
                     <% if (podeVerNotas && report.resolution_note) { %>
-                        <p class="mt-3 text-sm text-mangrove-800 leading-relaxed"><%- nl2br(report.resolution_note) %></p>
+                        <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-emerald-900 dark:text-emerald-200"><%- nl2br(report.resolution_note) %></p>
                     <% } %>
                 </div>
             <% } %>
-        </div>
+        </section>
 
-        <div id="comentarios" class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
-            <h2 class="font-display text-lg font-semibold text-ink mb-4">Comentários (<%= comments.length %>)</h2>
+        <!-- Comentários -->
+        <section id="comentarios" class="ca-card ca-card-pad">
+            <h2 class="flex items-center gap-2 font-display text-base font-bold text-slate-900 dark:text-white">
+                <svg class="h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/></svg>
+                Comentários
+                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400"><%= comments.length %></span>
+            </h2>
 
             <% if (!comments.length) { %>
-                <p class="text-xs text-ink/50 py-2">Ainda não há comentários.</p>
+                <p class="mt-4 rounded-xl border border-dashed border-slate-200 p-4 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    Ainda não há comentários. Sê o primeiro a partilhar informação útil.
+                </p>
+            <% } else { %>
+                <div class="mt-4 space-y-3">
+                    <% comments.forEach(function(c) { %>
+                        <article class="rounded-xl border p-3.5 <%= c.is_official ? 'border-blue-200 bg-blue-50/70 dark:border-blue-800 dark:bg-blue-950/30' : 'border-slate-100 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/50' %>">
+                            <div class="flex flex-wrap items-center justify-between gap-1 text-[11px]">
+                                <span class="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200">
+                                    <%= c.author_name %>
+                                    <% if (c.is_official) { %>
+                                        <span class="rounded-full bg-blue-600 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">Oficial</span>
+                                    <% } %>
+                                </span>
+                                <span class="text-slate-400 dark:text-slate-500"><%= formatDateTime(c.created_at) %></span>
+                            </div>
+                            <p class="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-300"><%- nl2br(c.content) %></p>
+                        </article>
+                    <% }) %>
+                </div>
             <% } %>
-            <div class="space-y-3 mb-6">
-                <% comments.forEach(function(c) { %>
-                    <div class="rounded-2xl p-3.5 border <%= c.is_official ? 'bg-jacaranda-50/70 border-jacaranda-200' : 'bg-parchment/60 border-jacaranda-50' %>">
-                        <div class="flex items-center justify-between text-[11px] text-ink/50 mb-1">
-                            <span class="font-semibold text-ink/70">
-                                <%= c.author_name %>
-                                <% if (c.is_official) { %><span class="ml-1 px-2 py-0.5 rounded-full bg-jacaranda-600 text-white text-[10px] uppercase tracking-wide">Oficial</span><% } %>
-                            </span>
-                            <span><%= formatarData(c.created_at) %></span>
-                        </div>
-                        <p class="text-sm text-ink/90 leading-relaxed"><%- nl2br(c.content) %></p>
-                    </div>
-                <% }) %>
-            </div>
 
             <% if (canComment) { %>
-                <form method="POST" action="<%= url('/ocorrencias/' + report.id + '/comentar') %>" class="space-y-3">
+                <form method="POST" action="<%= url('/ocorrencias/' + report.id + '/comentar') %>" class="mt-5 space-y-3 border-t border-slate-100 pt-5 dark:border-slate-800">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <label for="content" class="text-xs font-semibold text-ink/60 block">Adicionar comentário</label>
+                    <label for="content" class="ca-label">Adicionar comentário</label>
                     <textarea id="content" name="content" rows="3" maxlength="<%= maxComment %>" required
-                              class="w-full rounded-2xl border border-jacaranda-100 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-jacaranda-400"
-                              placeholder="Partilha informação útil sobre esta ocorrência..."><%= old.content || '' %></textarea>
-                    <button type="submit" class="rounded-full bg-jacaranda-600 hover:bg-jacaranda-700 text-white px-6 py-2.5 text-sm font-semibold transition">Publicar</button>
+                              class="ca-input resize-y"
+                              placeholder="Partilha informação útil sobre esta ocorrência…"><%= old.content || '' %></textarea>
+                    <button type="submit" class="ca-btn-primary">Publicar comentário</button>
                 </form>
             <% } else if (!usuarioAtual) { %>
-                <p class="text-xs text-ink/50"><a href="<%= url('/login') %>" class="text-jacaranda-600 font-semibold hover:underline">Entra</a> para comentar.</p>
+                <p class="mt-5 border-t border-slate-100 pt-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                    <a href="<%= url('/login') %>" class="ca-link">Entra</a> para comentar esta ocorrência.
+                </p>
             <% } %>
-        </div>
+        </section>
     </div>
 
-    <div class="lg:col-span-2">
-        <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
-            <h2 class="font-display text-lg font-semibold text-ink mb-4">Linha do tempo</h2>
-            <div class="relative pl-6 space-y-5 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-jacaranda-100">
-                <% history.forEach(function(entry) { %>
-                    <div class="relative">
-                        <span class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white bg-jacaranda-500 shadow-xs"></span>
-                        <strong class="text-sm font-semibold text-ink block"><%= statusLabel(entry.new_status) %></strong>
-                        <span class="text-[11px] text-ink/50"><%= formatarData(entry.created_at) %></span>
-                        <% if (podeVerNotas && entry.note) { %>
-                            <p class="mt-2 text-xs text-ink/70 rounded-lg bg-parchment/70 border border-jacaranda-50 p-2.5"><%- nl2br(entry.note) %></p>
-                        <% } %>
-                    </div>
-                <% }) %>
-            </div>
-        </div>
-    </div>
+    <!-- Coluna lateral -->
+    <aside class="space-y-6 lg:col-span-2">
+        <section class="ca-card ca-card-pad">
+            <h2 class="ca-eyebrow mb-4">Detalhes</h2>
+            <dl class="grid grid-cols-2 gap-2.5 text-xs">
+                <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                    <dt class="font-medium text-slate-400 dark:text-slate-500">Estado</dt>
+                    <dd class="mt-1"><span class="ca-badge <%= statusClasses(report.status) %>"><%= statusLabel(report.status) %></span></dd>
+                </div>
+                <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                    <dt class="font-medium text-slate-400 dark:text-slate-500">Prioridade</dt>
+                    <dd class="mt-1"><span class="ca-badge <%= priorityClasses(report.priority) %>"><%= priorityLabel(report.priority) %></span></dd>
+                </div>
+                <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                    <dt class="font-medium text-slate-400 dark:text-slate-500">Bairro</dt>
+                    <dd class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100"><%= report.neighborhood || 'Não indicado' %></dd>
+                </div>
+                <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                    <dt class="font-medium text-slate-400 dark:text-slate-500">Município</dt>
+                    <dd class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100"><%= report.municipality_name || 'Maputo' %></dd>
+                </div>
+                <div class="col-span-2 rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                    <dt class="font-medium text-slate-400 dark:text-slate-500">Departamento responsável</dt>
+                    <dd class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100"><%= report.department_name || 'Aguarda triagem' %></dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="ca-card ca-card-pad">
+            <h2 class="flex items-center gap-2 font-display text-base font-bold text-slate-900 dark:text-white">
+                <svg class="h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Linha do tempo
+            </h2>
+
+            <% if (!history || !history.length) { %>
+                <p class="mt-4 rounded-xl border border-dashed border-slate-200 p-4 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    Ainda não há atualizações registadas. A ocorrência está na fila de triagem do município.
+                </p>
+            <% } else { %>
+                <ol class="relative mt-4 space-y-4 pl-5 before:absolute before:bottom-2 before:left-[0.3rem] before:top-2 before:w-px before:bg-slate-200 dark:before:bg-slate-700">
+                    <% history.forEach(function(entry) { %>
+                        <li class="relative">
+                            <span class="absolute -left-[1.05rem] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-blue-500 shadow-sm dark:border-slate-900"></span>
+                            <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+                                <div class="flex flex-wrap items-center justify-between gap-1">
+                                    <strong class="text-xs font-bold text-slate-800 dark:text-slate-100"><%= statusLabel(entry.new_status) %></strong>
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500"><%= formatDateTime(entry.created_at) %></span>
+                                </div>
+                                <% if (podeVerNotas && entry.note) { %>
+                                    <p class="mt-2 rounded-lg border border-slate-100 bg-white/70 p-2.5 text-[11px] leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-300"><%- nl2br(entry.note) %></p>
+                                <% } %>
+                            </div>
+                        </li>
+                    <% }) %>
+                </ol>
+            <% } %>
+        </section>
+
+        <section class="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 dark:border-blue-900 dark:bg-blue-950/30">
+            <h2 class="font-display text-sm font-bold text-blue-900 dark:text-blue-100">Ajuda a priorizar</h2>
+            <p class="mt-1 text-xs leading-relaxed text-blue-800/80 dark:text-blue-200/80">
+                Se este problema também te afeta, confirma a ocorrência. As confirmações ajudam o município a perceber o impacto real no bairro.
+            </p>
+            <% if (!usuarioAtual) { %>
+                <a href="<%= url('/login') %>" class="mt-3 inline-flex text-xs font-bold text-blue-700 hover:underline dark:text-blue-300">Entrar na minha conta →</a>
+            <% } %>
+        </section>
+    </aside>
 </div>
 
 <%- include('../layouts/footer') %>

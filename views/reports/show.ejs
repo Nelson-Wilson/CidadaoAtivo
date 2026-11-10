@@ -1,178 +1,202 @@
 <%- include('../layouts/header') %>
 
-<div class="mb-6 flex items-center gap-2 text-sm text-ink/50">
-    <a href="<%= url('/denuncias') %>" class="hover:text-jacaranda-600 transition flex items-center gap-1">
-        <span>←</span>
-        <span>Voltar às minhas denúncias</span>
+<nav class="mb-5 flex items-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500" aria-label="Navegação estrutural">
+    <a href="<%= url('/denuncias') %>" class="inline-flex items-center gap-1 transition hover:text-blue-600 dark:hover:text-blue-400">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+        As minhas denúncias
     </a>
-</div>
+    <span aria-hidden="true">/</span>
+    <span class="text-slate-700 dark:text-slate-200">Denúncia #<%= report.id %></span>
+</nav>
 
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+<header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
-        <div class="flex items-center gap-3">
-            <span class="text-sm font-mono text-ink/40 font-bold">#<%= report.id %></span>
-            <h1 class="font-display text-2xl sm:text-3xl font-bold text-ink"><%= report.category_name %></h1>
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="font-mono text-xs font-bold text-slate-400 dark:text-slate-500">#<%= report.id %></span>
+            <span class="ca-badge <%= statusClasses(report.status) %>"><%= statusLabel(report.status) %></span>
+            <% if (report.priority === 'urgente' || report.priority === 'muito_urgente') { %>
+                <span class="ca-badge <%= priorityClasses(report.priority) %>">
+                    <span aria-hidden="true">🚨</span> <%= priorityLabel(report.priority) %>
+                </span>
+            <% } %>
         </div>
-        <p class="text-xs sm:text-sm text-ink/50 mt-1">Registada em <%= formatarData(report.created_at) %> no bairro <%= report.neighborhood || 'Maputo' %></p>
+        <h1 class="ca-page-title mt-2"><%= report.category_name %></h1>
+        <p class="ca-muted mt-1">
+            Registada a <%= formatDateTime(report.created_at) %> · Bairro <%= report.neighborhood || 'não indicado' %>
+        </p>
     </div>
-    <span class="self-start sm:self-auto text-sm font-semibold px-4 py-1.5 rounded-full border <%= statusClasses(report.status) %> shadow-xs">
-        <%= statusLabel(report.status) %>
-    </span>
-</div>
 
-<!-- Barra de Progresso Visual da Ocorrência (Status Stepper) -->
-<div class="mb-10 bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
-    <h2 class="text-xs font-semibold uppercase tracking-wider text-ink/40 mb-4">Progresso do Atendimento</h2>
-    <%
-        const etapas = [
-            { id: 'recebida', label: 'Recebida' },
-            { id: 'em_analise', label: 'Em Análise' },
-            { id: 'atribuida', label: 'Atribuída' },
-            { id: 'em_execucao', label: 'Em Execução' },
-            { id: 'resolvida', label: 'Resolvida' },
-        ];
-        const statusIdx = etapas.findIndex(e => e.id === report.status);
-    %>
-    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
-        <% etapas.forEach(function(etapa, idx) {
-            const concluida = statusIdx >= idx;
-            const atual = statusIdx === idx;
+    <a href="https://www.openstreetmap.org/?mlat=<%= report.latitude %>&mlon=<%= report.longitude %>#map=18"
+       target="_blank" rel="noopener noreferrer" class="ca-btn-secondary self-start">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+        Abrir no mapa
+    </a>
+</header>
+
+<!-- Progresso -->
+<% if (report.status === 'rejeitada') { %>
+    <div class="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-600 text-white">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </span>
+        <div class="text-xs leading-relaxed sm:text-sm">
+            <strong class="block font-bold">Denúncia rejeitada pelo município</strong>
+            Consulta o histórico abaixo ou contacta o Conselho Municipal para obter mais detalhes.
+        </div>
+    </div>
+<% } else { %>
+    <section class="ca-card ca-card-pad mb-6">
+        <h2 class="ca-eyebrow mb-4">Progresso do atendimento</h2>
+        <%
+            const etapas = [
+                { id: 'recebida', label: 'Recebida' },
+                { id: 'em_analise', label: 'Em Análise' },
+                { id: 'atribuida', label: 'Atribuída' },
+                { id: 'em_execucao', label: 'Em execução' },
+                { id: 'resolvida', label: 'Resolvida' },
+            ];
+            let statusIdx = etapas.findIndex(function (e) { return e.id === report.status; });
+            if (report.status === 'fechada') statusIdx = etapas.length - 1;
         %>
-            <div class="p-3 rounded-2xl border transition <%= atual ? 'border-jacaranda-500 bg-jacaranda-50 font-bold text-jacaranda-800' : (concluida ? 'border-mangrove-200 bg-mangrove-50/50 text-mangrove-700' : 'border-jacaranda-50 text-ink/30') %>">
-                <div class="text-sm mb-1">
-                    <%= concluida ? '✓' : (idx + 1) %>
-                </div>
-                <span><%= etapa.label %></span>
-            </div>
-        <% }) %>
-    </div>
-</div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Evidência e Descrição -->
-    <div class="space-y-6">
-        <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
-            <h2 class="font-display text-lg font-semibold text-ink mb-4">Registo do Problema</h2>
-            <% if (report.photo_path) { %>
-                <img src="<%= url(report.photo_path) %>" alt="Fotografia da ocorrência"
-                     class="w-full max-h-96 rounded-2xl border border-jacaranda-100 object-cover mb-4">
-            <% } %>
+        <ol class="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <% etapas.forEach(function(etapa, idx) {
+                const concluida = statusIdx >= idx;
+                const atual = statusIdx === idx;
+            %>
+                <li class="rounded-xl border p-3 text-center text-[11px] transition <%= atual ? 'border-blue-500 bg-blue-50 font-bold text-blue-800 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200' : (concluida ? 'border-emerald-200 bg-emerald-50/70 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300' : 'border-slate-200 text-slate-400 dark:border-slate-700 dark:text-slate-500') %>">
+                    <span class="mx-auto mb-1.5 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold <%= atual ? 'bg-blue-600 text-white' : (concluida ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500') %>">
+                        <% if (concluida) { %>
+                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        <% } else { %>
+                            <%= idx + 1 %>
+                        <% } %>
+                    </span>
+                    <%= etapa.label %>
+                </li>
+            <% }) %>
+        </ol>
+    </section>
+<% } %>
 
-            <div class="bg-parchment rounded-2xl p-4 border border-jacaranda-100/60 mb-6">
-                <p class="text-xs font-semibold text-ink/50 uppercase tracking-wider mb-1">Descrição do Cidadão</p>
-                <p class="text-sm text-ink/90 leading-relaxed"><%- nl2br(report.description) %></p>
-            </div>
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <!-- Registo -->
+    <section class="ca-card ca-card-pad">
+        <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">Registo do problema</h2>
 
-            <p class="text-xs text-ink/60 mb-4">
-                👍 <strong><%= report.votes_count %></strong> cidadãos confirmaram esta ocorrência ·
-                <a href="<%= url('/ocorrencias/' + report.id) %>" class="text-jacaranda-600 font-semibold hover:underline">Ver página pública e comentários</a>
-            </p>
+        <% if (report.photo_path) { %>
+            <img src="<%= url(report.photo_path) %>" alt="Fotografia da ocorrência <%= report.category_name %>" loading="lazy"
+                 class="mt-4 max-h-96 w-full rounded-xl border border-slate-200 object-cover dark:border-slate-700">
+        <% } %>
 
-            <dl class="grid grid-cols-2 gap-4 text-xs text-ink/70">
-                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
-                    <span class="text-ink/40 block mb-0.5 font-medium">Bairro</span>
-                    <strong class="text-ink text-sm"><%= report.neighborhood || 'Não indicado' %></strong>
-                </div>
-                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
-                    <span class="text-ink/40 block mb-0.5 font-medium">Município</span>
-                    <strong class="text-ink text-sm"><%= report.municipality_name || 'Maputo' %></strong>
-                </div>
-                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
-                    <span class="text-ink/40 block mb-0.5 font-medium">Departamento</span>
-                    <strong class="text-ink text-sm"><%= report.department_name || 'A aguardar triagem' %></strong>
-                </div>
-                <div class="p-3 rounded-xl bg-white border border-jacaranda-50">
-                    <span class="text-ink/40 block mb-0.5 font-medium">Localização</span>
-                    <a href="https://www.openstreetmap.org/?mlat=<%= report.latitude %>&mlon=<%= report.longitude %>#map=18"
-                       target="_blank" class="text-jacaranda-600 font-semibold hover:underline block truncate">
-                        Abrir mapa ↗
-                    </a>
-                </div>
-            </dl>
-
-            <% if (report.resolution_photo || report.resolution_note) { %>
-                <div class="mt-6 rounded-2xl border border-mangrove-100 bg-mangrove-50/50 p-4">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-mangrove-700 mb-2">Resolução</h3>
-                    <% if (report.resolution_photo) { %>
-                        <img src="<%= url(report.resolution_photo) %>" alt="Fotografia da resolução"
-                             class="w-full max-h-72 rounded-xl border border-mangrove-100 object-cover mb-3">
-                    <% } %>
-                    <% if (report.resolution_note) { %>
-                        <p class="text-sm text-mangrove-800 leading-relaxed"><%- nl2br(report.resolution_note) %></p>
-                    <% } %>
-                </div>
-            <% } %>
+        <div class="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+            <p class="ca-eyebrow mb-1">Descrição do cidadão</p>
+            <p class="whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-300"><%- nl2br(report.description) %></p>
         </div>
-    </div>
 
-    <!-- Histórico de Atualizações da Máquina de Estados -->
-    <div class="space-y-6">
-        <% if (canRate) { %>
-            <div class="bg-mangrove-50/60 border border-mangrove-100 rounded-3xl p-6 shadow-soft">
-                <h2 class="font-display text-lg font-semibold text-ink mb-1">O problema foi resolvido?</h2>
-                <p class="text-xs text-ink/60 mb-4">Avalia o serviço. A tua avaliação fecha a denúncia.</p>
-                <form method="POST" action="<%= url('/denuncias/' + report.id + '/avaliar') %>" class="space-y-4">
+        <p class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+            <span>👍 <strong class="font-bold text-slate-700 dark:text-slate-200"><%= report.votes_count || 0 %></strong> confirmações</span>
+            <a href="<%= url('/ocorrencias/' + report.id) %>" class="ca-link">Ver página pública e comentários →</a>
+        </p>
+
+        <% if (report.resolution_photo || report.resolution_note) { %>
+            <div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                <p class="ca-eyebrow mb-2 text-emerald-700 dark:text-emerald-300">Resolução</p>
+                <% if (report.resolution_photo) { %>
+                    <img src="<%= url(report.resolution_photo) %>" alt="Fotografia da resolução" loading="lazy"
+                         class="max-h-72 w-full rounded-xl border border-emerald-200 object-cover dark:border-emerald-900">
+                <% } %>
+                <% if (report.resolution_note) { %>
+                    <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-emerald-900 dark:text-emerald-200"><%- nl2br(report.resolution_note) %></p>
+                <% } %>
+            </div>
+        <% } %>
+
+        <dl class="mt-4 grid grid-cols-2 gap-2.5 text-xs">
+            <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                <dt class="font-medium text-slate-400 dark:text-slate-500">Bairro</dt>
+                <dd class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100"><%= report.neighborhood || 'Não indicado' %></dd>
+            </div>
+            <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                <dt class="font-medium text-slate-400 dark:text-slate-500">Município</dt>
+                <dd class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100"><%= report.municipality_name || 'Maputo' %></dd>
+            </div>
+            <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                <dt class="font-medium text-slate-400 dark:text-slate-500">Departamento</dt>
+                <dd class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100"><%= report.department_name || 'Aguarda triagem' %></dd>
+            </div>
+            <div class="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                <dt class="font-medium text-slate-400 dark:text-slate-500">Técnico</dt>
+                <dd class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100"><%= report.technician_name || 'Por atribuir' %></dd>
+            </div>
+        </dl>
+    </section>
+
+    <!-- Histórico -->
+    <section class="ca-card ca-card-pad">
+        <% if (typeof canRate !== 'undefined' && canRate) { %>
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">O problema foi resolvido?</h2>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Avalia o serviço. A tua avaliação fecha a denúncia.</p>
+                <form method="POST" action="<%= url('/denuncias/' + report.id + '/avaliar') %>" class="mt-3 space-y-3">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <fieldset>
-                        <legend class="text-xs font-semibold text-ink/60 mb-2">Nota</legend>
+                        <legend class="ca-label">Nota (1 = muito insatisfeito · 5 = muito satisfeito)</legend>
                         <div class="flex gap-2">
                             <% [1,2,3,4,5].forEach(function(n) { %>
                                 <label class="cursor-pointer">
                                     <input type="radio" name="score" value="<%= n %>" class="peer sr-only" <%= n === 5 ? 'checked' : '' %>>
-                                    <span class="block w-11 h-11 rounded-xl border border-mangrove-100 bg-white text-center leading-[2.7rem] font-bold text-ink/60 peer-checked:bg-mangrove-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-mangrove-600"><%= n %></span>
+                                    <span class="block h-10 w-10 rounded-xl border border-slate-200 bg-white text-center text-sm font-bold leading-10 text-slate-600 transition peer-checked:border-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"><%= n %></span>
                                 </label>
                             <% }) %>
                         </div>
-                        <p class="text-[11px] text-ink/40 mt-1">1 = muito insatisfeito · 5 = muito satisfeito</p>
                     </fieldset>
                     <div>
-                        <label for="feedback" class="text-xs font-semibold text-ink/60 block mb-1">Comentário (opcional)</label>
-                        <textarea id="feedback" name="feedback" rows="3" maxlength="1000"
-                                  class="w-full rounded-2xl border border-jacaranda-100 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-jacaranda-400"
-                                  placeholder="Como correu a reparação?"></textarea>
+                        <label for="feedback" class="ca-label">Comentário <span class="font-normal text-slate-400">(opcional)</span></label>
+                        <textarea id="feedback" name="feedback" rows="3" maxlength="1000" class="ca-input resize-y" placeholder="Como correu a reparação?"></textarea>
                     </div>
-                    <button type="submit" class="rounded-full bg-mangrove-600 hover:bg-mangrove-700 text-white px-6 py-2.5 text-sm font-semibold transition">Avaliar e fechar</button>
+                    <button type="submit" class="ca-btn-primary w-full bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500/20">Avaliar e fechar</button>
                 </form>
             </div>
-        <% } else if (rating) { %>
-            <div class="bg-mangrove-50/60 border border-mangrove-100 rounded-3xl p-6 shadow-soft">
-                <h2 class="font-display text-lg font-semibold text-ink mb-1">A tua avaliação</h2>
-                <p class="text-2xl text-baobab-400" aria-label="<%= rating.score %> de 5"><%= '★'.repeat(rating.score) %><span class="text-ink/20"><%= '★'.repeat(5 - rating.score) %></span></p>
-                <% if (rating.feedback) { %><p class="text-sm text-ink/70 mt-2"><%- nl2br(rating.feedback) %></p><% } %>
+        <% } else if (typeof rating !== 'undefined' && rating) { %>
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">A tua avaliação</h2>
+                <p class="mt-1 text-xl text-amber-500" aria-label="<%= rating.score %> de 5"><%= '★'.repeat(rating.score) %><span class="text-slate-300 dark:text-slate-600"><%= '★'.repeat(5 - rating.score) %></span></p>
+                <% if (rating.feedback) { %><p class="mt-2 whitespace-pre-line text-sm text-slate-600 dark:text-slate-300"><%- nl2br(rating.feedback) %></p><% } %>
             </div>
         <% } %>
 
-        <div class="bg-white border border-jacaranda-100 rounded-3xl p-6 shadow-soft">
-            <h2 class="font-display text-lg font-semibold text-ink mb-4 flex items-center gap-2">
-                <span>📋</span>
-                <span>Linha do Tempo de Atendimento</span>
-            </h2>
+        <h2 class="flex items-center gap-2 font-display text-base font-bold text-slate-900 dark:text-white">
+            <svg class="h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Linha do tempo
+        </h2>
 
-            <% if (!history || !history.length) { %>
-                <p class="text-xs text-ink/50 py-4">Sem registos de histórico.</p>
-            <% } else { %>
-                <div class="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-jacaranda-100">
-                    <% history.forEach(function(entry) { %>
-                        <div class="relative group">
-                            <span class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white bg-jacaranda-500 shadow-xs"></span>
-                            <div class="bg-parchment/60 rounded-2xl p-3.5 border border-jacaranda-50">
-                                <strong class="text-sm font-semibold text-ink block mb-0.5">
-                                    <%= statusLabel(entry.new_status) %>
-                                </strong>
-                                <div class="flex items-center justify-between text-[11px] text-ink/50">
-                                    <span><%= formatarData(entry.created_at) %></span>
-                                    <span><%= entry.changed_by_name ? 'Por: ' + entry.changed_by_name : '' %></span>
-                                </div>
-                                <% if (entry.note) { %>
-                                    <p class="text-xs text-ink/70 mt-2 rounded-xl bg-white/70 border border-jacaranda-50 p-2.5"><%- nl2br(entry.note) %></p>
-                                <% } %>
+        <% if (!history || !history.length) { %>
+            <p class="mt-4 rounded-xl border border-dashed border-slate-200 p-4 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                Ainda não há atualizações registadas. A denúncia está na fila de triagem do município.
+            </p>
+        <% } else { %>
+            <ol class="relative mt-4 space-y-4 pl-5 before:absolute before:bottom-2 before:left-[0.3rem] before:top-2 before:w-px before:bg-slate-200 dark:before:bg-slate-700">
+                <% history.forEach(function(entry) { %>
+                    <li class="relative">
+                        <span class="absolute -left-[1.05rem] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-blue-500 shadow-sm dark:border-slate-900"></span>
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+                            <div class="flex flex-wrap items-center justify-between gap-1">
+                                <strong class="text-xs font-bold text-slate-800 dark:text-slate-100"><%= statusLabel(entry.new_status) %></strong>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500"><%= formatDateTime(entry.created_at) %></span>
                             </div>
+                            <% if (entry.changed_by_name) { %>
+                                <p class="mt-0.5 text-[10px] text-slate-400 dark:text-slate-500">Por <%= entry.changed_by_name %></p>
+                            <% } %>
+                            <% if (entry.note) { %>
+                                <p class="mt-2 rounded-lg border border-slate-100 bg-white/70 p-2.5 text-[11px] leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-300"><%- nl2br(entry.note) %></p>
+                            <% } %>
                         </div>
-                    <% }) %>
-                </div>
-            <% } %>
-        </div>
-    </div>
+                    </li>
+                <% }) %>
+            </ol>
+        <% } %>
+    </section>
 </div>
 
 <%- include('../layouts/footer') %>

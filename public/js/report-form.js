@@ -1,304 +1,344 @@
-// Cidadão Ativo — captura de localização no formulário de nova denúncia.
+// Cidadão Ativo — mapa de localização e assistência por IA no formulário de denúncia.
+(function () {
+    'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
-    const mapEl = document.getElementById('location-picker');
-    if (!mapEl || typeof L === 'undefined') return;
+    function obterApiBase() {
+        var alvo = document.querySelector('[data-api-base]');
+        return (alvo && alvo.dataset.apiBase) || '/api';
+    }
 
-    const latInput = document.getElementById('latitude');
-    const lngInput = document.getElementById('longitude');
-    const statusEl = document.getElementById('location-status');
+    function csrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.content : '';
+    }
 
-    const defaultCenter = [-25.9692, 32.5732]; // Maputo
+    function alternar(elemento, visivel) {
+        if (elemento) elemento.classList.toggle('hidden', !visivel);
+    }
 
-    const map = L.map(mapEl).setView(defaultCenter, 13);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-        maxZoom: 19,
-    }).addTo(map);
+    // --- Localização: GPS + pino arrastável ---------------------------------
+    document.addEventListener('DOMContentLoaded', function () {
+        var mapEl = document.getElementById('location-picker');
+        if (!mapEl || typeof L === 'undefined') return;
 
-    let marker = null;
+        var latInput = document.getElementById('latitude');
+        var lngInput = document.getElementById('longitude');
+        var statusEl = document.getElementById('location-status');
+        var defaultCenter = [-25.9692, 32.5732];
 
-    function setLocation(lat, lng, zoom = 16) {
-        latInput.value = lat.toFixed(7);
-        lngInput.value = lng.toFixed(7);
+        var map = L.map(mapEl, { scrollWheelZoom: false }).setView(defaultCenter, 13);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+            maxZoom: 19,
+        }).addTo(map);
 
-        if (marker) {
-            marker.setLatLng([lat, lng]);
-        } else {
-            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-            marker.on('dragend', () => {
-                const pos = marker.getLatLng();
-                setLocation(pos.lat, pos.lng, map.getZoom());
-            });
+        var marker = null;
+
+        function escreverStatus(texto) {
+            if (statusEl) statusEl.textContent = texto;
         }
 
-        map.setView([lat, lng], zoom);
-    }
+        function setLocation(lat, lng, zoom) {
+            latInput.value = Number(lat).toFixed(7);
+            lngInput.value = Number(lng).toFixed(7);
 
-    map.on('click', (e) => setLocation(e.latlng.lat, e.latlng.lng, map.getZoom()));
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setLocation(position.coords.latitude, position.coords.longitude);
-                statusEl.textContent = 'Localização obtida por GPS. Podes ajustar arrastando o marcador.';
-            },
-            () => {
-                setLocation(defaultCenter[0], defaultCenter[1], 12);
-                statusEl.textContent = 'Não foi possível obter o GPS. Marca o local manualmente no mapa.';
-            },
-            { enableHighAccuracy: true, timeout: 8000 }
-        );
-    } else {
-        setLocation(defaultCenter[0], defaultCenter[1], 12);
-        statusEl.textContent = 'O teu navegador não suporta geolocalização. Marca o local manualmente.';
-    }
-});
-
-// --- IA (Sprint 3): sugestão de categoria + aviso de possíveis duplicados. ---
-document.addEventListener('DOMContentLoaded', () => {
-    const descriptionEl = document.getElementById('description');
-    const categoryEl = document.getElementById('category_id');
-    const latInput = document.getElementById('latitude');
-    const suggestionEl = document.getElementById('ai-suggestion');
-    const duplicateWarning = document.getElementById('duplicate-warning');
-    const duplicateList = document.getElementById('duplicate-list');
-
-    if (!descriptionEl) return;
-
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const apiBase = document.body.dataset.apiBase || '/api';
-    let debounceTimer = null;
-
-    async function postJson(url, body) {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-CSRF-Token': csrfToken ?? '',
-            },
-            body: JSON.stringify(body),
-        });
-        if (!response.ok) return null;
-        return response.json();
-    }
-
-    async function postForm(url, formData) {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'X-CSRF-Token': csrfToken ?? '' },
-            body: formData,
-        });
-        if (!response.ok) return null;
-        return response.json();
-    }
-
-    async function runClassification() {
-        const description = descriptionEl.value.trim();
-        if (description.length < 10) return;
-
-        const result = await postJson(`${apiBase}/ai/classify`, { description });
-        const data = result?.data;
-        if (!data || !data.category_name) {
-            suggestionEl.style.display = 'none';
-            return;
-        }
-
-        suggestionEl.textContent = `Sugestão da IA: "${data.category_name}"${data.severity === 'alta' ? ' — parece um caso mais grave' : ''}. Clica para aplicar.`;
-        suggestionEl.style.display = 'block';
-        suggestionEl.onclick = () => {
-            if (data.category_id) categoryEl.value = data.category_id;
-            suggestionEl.style.display = 'none';
-        };
-    }
-
-    async function runDuplicateCheck() {
-        const description = descriptionEl.value.trim();
-        const categoryId = categoryEl.value;
-        const lat = latInput.value;
-        const lng = document.getElementById('longitude').value;
-
-        if (description.length < 10 || !categoryId || !lat || !lng) {
-            duplicateWarning.style.display = 'none';
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('description', description);
-        formData.append('category_id', categoryId);
-        formData.append('latitude', lat);
-        formData.append('longitude', lng);
-
-        // Se já houver foto escolhida, envia-a também — reforça a confirmação
-        // dos 2 candidatos mais prováveis com comparação visual pela IA.
-        const photoFile = document.getElementById('photo')?.files?.[0];
-        if (photoFile) formData.append('photo', photoFile);
-
-        const result = await postForm(`${apiBase}/ai/duplicates`, formData);
-
-        const matches = result?.data ?? [];
-        if (!matches.length) {
-            duplicateWarning.style.display = 'none';
-            return;
-        }
-
-        function escaparHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str ?? '';
-            return div.innerHTML;
-        }
-
-        duplicateList.innerHTML = '';
-        matches.forEach((match) => {
-            const item = document.createElement('div');
-            item.style.cssText = 'display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #EAC57C;border-radius:10px;padding:8px;';
-
-            const safeDesc = escaparHtml(match.description);
-            const safeReasoning = match.ai_reasoning ? escaparHtml(match.ai_reasoning) : '';
-
-            const aiNote = match.ai_same === true
-                ? `<p style="margin:2px 0 0;font-size:11px;color:#9C4526;font-weight:600;">🤖 A IA confirma: parece ser o mesmo problema${safeReasoning ? ' — ' + safeReasoning : ''}.</p>`
-                : (match.ai_same === false
-                    ? `<p style="margin:2px 0 0;font-size:11px;color:#6b7280;">🤖 A IA acha que pode ser diferente${safeReasoning ? ' — ' + safeReasoning : ''}.</p>`
-                    : '');
-
-            const safePhoto = match.photo_url
-                ? `<img src="${encodeURI(match.photo_url)}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">`
-                : '';
-
-            item.innerHTML = `
-                ${safePhoto}
-                <div style="flex:1;">
-                    <p style="margin:0;font-size:12px;color:#374151;">${safeDesc}</p>
-                    <p style="margin:0;font-size:11px;color:#9ca3af;">${match.distance_km} km de distância · ${match.confirmations_count} confirmação(ões)</p>
-                    ${aiNote}
-                </div>
-                <button type="button" data-report-id="${match.report_id}"
-                        style="font-size:12px;background:#C08C28;color:#fff;border:none;border-radius:9999px;padding:5px 10px;cursor:pointer;">
-                    É este
-                </button>
-            `;
-            duplicateList.appendChild(item);
-        });
-
-        duplicateList.querySelectorAll('button[data-report-id]').forEach((btn) => {
-            btn.addEventListener('click', async () => {
-                const reportId = btn.dataset.reportId;
-                await postJson(`${apiBase}/ai/duplicates/${reportId}/confirm`, {});
-                btn.textContent = 'Confirmado ✓';
-                btn.disabled = true;
-            });
-        });
-
-        duplicateWarning.style.display = 'block';
-    }
-
-    function debounce(fn, ms) {
-        return (...args) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => fn(...args), ms);
-        };
-    }
-
-    const debouncedCheck = debounce(() => {
-        runClassification();
-        runDuplicateCheck();
-    }, 700);
-
-    descriptionEl.addEventListener('input', debouncedCheck);
-    categoryEl.addEventListener('change', debouncedCheck);
-    latInput.addEventListener('change', debouncedCheck);
-
-    // Exposto para o bloco de análise de foto poder recorrer a este mesmo
-    // aviso de duplicados assim que a foto for escolhida.
-    window.__recheckDuplicates = () => runDuplicateCheck();
-});
-
-// --- IA (Sprint 3+): análise da FOTOGRAFIA por visão computacional. ---
-// Assim que o cidadão escolhe/tira a foto, envia-a de imediato para a IA
-// analisar e pré-seleccionar a categoria — o cidadão pode sempre corrigir
-// antes de enviar a denúncia.
-document.addEventListener('DOMContentLoaded', () => {
-    const photoInput = document.getElementById('photo');
-    const categoryEl = document.getElementById('category_id');
-    const descriptionEl = document.getElementById('description');
-    const noteEl = document.getElementById('photo-ai-note');
-    const analyzingEl = document.getElementById('photo-analyzing');
-
-    if (!photoInput) return;
-
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const apiBase = document.body.dataset.apiBase || '/api';
-
-    photoInput.addEventListener('change', async () => {
-        const file = photoInput.files?.[0];
-        if (!file) return;
-
-        noteEl.classList.add('hidden');
-        analyzingEl.classList.remove('hidden');
-
-        const formData = new FormData();
-        formData.append('photo', file);
-        formData.append('description', descriptionEl.value.trim());
-
-        try {
-            const response = await fetch(`${apiBase}/ai/analyze-photo`, {
-                method: 'POST',
-                headers: { 'X-CSRF-Token': csrfToken ?? '' },
-                body: formData,
-            });
-            const result = await response.json();
-            const data = result?.data;
-
-            analyzingEl.classList.add('hidden');
-
-            if (!data || !data.category_id) {
-                return; // IA desactivada, sem chave configurada, ou não conseguiu identificar — segue sem sugestão.
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                marker.on('dragend', function () {
+                    var pos = marker.getLatLng();
+                    setLocation(pos.lat, pos.lng, map.getZoom());
+                    escreverStatus('Local ajustado manualmente. Confirma se o pino está no sítio certo.');
+                    latInput.dispatchEvent(new Event('change'));
+                });
             }
 
-            categoryEl.value = data.category_id;
+            map.setView([lat, lng], zoom || map.getZoom());
+        }
 
-            const severityNote = data.severity === 'alta' ? ' Parece um caso mais grave.' : '';
-            noteEl.textContent = `🤖 A IA identificou "${data.category_name}" na fotografia.${severityNote} Podes corrigir se não for isso.`;
-            noteEl.classList.remove('hidden');
+        map.on('click', function (evento) {
+            setLocation(evento.latlng.lat, evento.latlng.lng, map.getZoom());
+            escreverStatus('Local escolhido no mapa. Podes arrastar o pino para afinar.');
+            latInput.dispatchEvent(new Event('change'));
+        });
 
-            // Com a categoria já preenchida pela IA, aproveita para reforçar
-            // o aviso de duplicados com a comparação visual desta foto.
-            window.__recheckDuplicates?.();
-        } catch (err) {
-            analyzingEl.classList.add('hidden');
+        var latitudeInicial = parseFloat(latInput.value);
+        var longitudeInicial = parseFloat(lngInput.value);
+        var temPosicaoGuardada = Number.isFinite(latitudeInicial) && Number.isFinite(longitudeInicial);
+
+        if (temPosicaoGuardada) {
+            setLocation(latitudeInicial, longitudeInicial, 15);
+            escreverStatus('Localização anterior recuperada. Podes ajustar o pino se necessário.');
+            return;
+        }
+
+        if (!navigator.geolocation) {
+            setLocation(defaultCenter[0], defaultCenter[1], 12);
+            escreverStatus('O navegador não suporta geolocalização. Marca o local onde ocorreu o problema.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (posicao) {
+                setLocation(posicao.coords.latitude, posicao.coords.longitude, 16);
+                escreverStatus('Localização GPS obtida. Arrasta o pino se o ponto não estiver exato.');
+                latInput.dispatchEvent(new Event('change'));
+            },
+            function () {
+                setLocation(defaultCenter[0], defaultCenter[1], 12);
+                escreverStatus('Sem acesso ao GPS. Clica no mapa para marcar o local.');
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+        );
+    });
+
+    // --- IA: sugestão de categoria, duplicados e análise da fotografia ------
+    document.addEventListener('DOMContentLoaded', function () {
+        var descriptionEl = document.getElementById('description');
+        if (!descriptionEl) return;
+
+        var categoryEl = document.getElementById('category_id');
+        var latInput = document.getElementById('latitude');
+        var lngInput = document.getElementById('longitude');
+        var suggestionEl = document.getElementById('ai-suggestion');
+        var duplicateWarning = document.getElementById('duplicate-warning');
+        var duplicateList = document.getElementById('duplicate-list');
+        var photoInput = document.getElementById('photo');
+        var previewEl = document.getElementById('photo-preview');
+        var photoNote = document.getElementById('photo-ai-note');
+        var photoAnalyzing = document.getElementById('photo-analyzing');
+
+        var apiBase = obterApiBase();
+        var token = csrfToken();
+        var debounceTimer = null;
+        var sugestaoAtual = null;
+        var previewUrl = null;
+
+        function postJson(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-Token': token,
+                },
+                body: JSON.stringify(body),
+            }).then(function (resposta) {
+                return resposta.ok ? resposta.json() : null;
+            }).catch(function () {
+                return null;
+            });
+        }
+
+        function postForm(url, formData) {
+            return fetch(url, {
+                method: 'POST',
+                headers: { Accept: 'application/json', 'X-CSRF-Token': token },
+                body: formData,
+            }).then(function (resposta) {
+                return resposta.ok ? resposta.json() : null;
+            }).catch(function () {
+                return null;
+            });
+        }
+
+        async function runClassification() {
+            var descricao = descriptionEl.value.trim();
+            if (descricao.length < 10) {
+                alternar(suggestionEl, false);
+                return;
+            }
+
+            var resultado = await postJson(apiBase + '/ai/classify', { description: descricao });
+            var dados = resultado && resultado.data;
+            if (!dados || !dados.category_name) {
+                alternar(suggestionEl, false);
+                return;
+            }
+
+            sugestaoAtual = dados;
+            suggestionEl.textContent = 'Sugestão da IA: “' + dados.category_name + '”'
+                + (dados.severity === 'alta' ? ' — parece um caso mais grave' : '')
+                + '. Clica para aplicar.';
+            alternar(suggestionEl, true);
+        }
+
+        function criarItemDuplicado(match) {
+            var item = document.createElement('div');
+            item.className = 'flex items-start gap-3 rounded-xl border border-amber-200 bg-white p-2.5 dark:border-amber-800 dark:bg-slate-900';
+
+            if (match.photo_url) {
+                var img = document.createElement('img');
+                img.src = match.photo_url;
+                img.alt = '';
+                img.loading = 'lazy';
+                img.className = 'h-12 w-12 shrink-0 rounded-lg object-cover';
+                item.appendChild(img);
+            }
+
+            var corpo = document.createElement('div');
+            corpo.className = 'min-w-0 flex-1';
+
+            var descricao = document.createElement('p');
+            descricao.className = 'text-[11px] leading-snug text-slate-700 dark:text-slate-200';
+            descricao.textContent = match.description || 'Ocorrência sem descrição.';
+            corpo.appendChild(descricao);
+
+            var meta = document.createElement('p');
+            meta.className = 'mt-0.5 text-[10px] text-slate-400 dark:text-slate-500';
+            meta.textContent = (match.distance_km || 0) + ' km · '
+                + (match.confirmations_count || 0) + ' confirmação(ões)';
+            corpo.appendChild(meta);
+
+            if (match.ai_same === true || match.ai_same === false) {
+                var nota = document.createElement('p');
+                nota.className = match.ai_same
+                    ? 'mt-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300'
+                    : 'mt-1 text-[10px] text-slate-500 dark:text-slate-400';
+                nota.textContent = (match.ai_same ? 'A IA confirma: parece o mesmo problema' : 'A IA acha que pode ser diferente')
+                    + (match.ai_reasoning ? ' — ' + match.ai_reasoning : '');
+                corpo.appendChild(nota);
+            }
+
+            item.appendChild(corpo);
+
+            var botao = document.createElement('button');
+            botao.type = 'button';
+            botao.className = 'shrink-0 rounded-lg bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white transition hover:bg-amber-600 disabled:opacity-60';
+            botao.textContent = 'É este';
+            botao.addEventListener('click', async function () {
+                botao.disabled = true;
+                botao.textContent = 'A confirmar…';
+                var confirmacao = await postJson(apiBase + '/ai/duplicates/' + match.report_id + '/confirm', {});
+                botao.textContent = confirmacao ? 'Confirmado ✓' : 'Tenta novamente';
+                botao.disabled = Boolean(confirmacao);
+            });
+            item.appendChild(botao);
+
+            return item;
+        }
+
+        async function runDuplicateCheck() {
+            var descricao = descriptionEl.value.trim();
+            var categoria = categoryEl ? categoryEl.value : '';
+            var lat = latInput ? latInput.value : '';
+            var lng = lngInput ? lngInput.value : '';
+
+            if (descricao.length < 10 || !categoria || !lat || !lng) {
+                alternar(duplicateWarning, false);
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('description', descricao);
+            formData.append('category_id', categoria);
+            formData.append('latitude', lat);
+            formData.append('longitude', lng);
+
+            var ficheiro = photoInput && photoInput.files ? photoInput.files[0] : null;
+            if (ficheiro) formData.append('photo', ficheiro);
+
+            var resultado = await postForm(apiBase + '/ai/duplicates', formData);
+            var matches = resultado && Array.isArray(resultado.data) ? resultado.data : [];
+
+            if (!matches.length) {
+                alternar(duplicateWarning, false);
+                return;
+            }
+
+            duplicateList.innerHTML = '';
+            matches.forEach(function (match) {
+                duplicateList.appendChild(criarItemDuplicado(match));
+            });
+            alternar(duplicateWarning, true);
+        }
+
+        function debounce(fn, ms) {
+            return function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fn, ms);
+            };
+        }
+
+        var verificarTudo = debounce(function () {
+            runClassification();
+            runDuplicateCheck();
+        }, 700);
+
+        descriptionEl.addEventListener('input', verificarTudo);
+        if (categoryEl) categoryEl.addEventListener('change', verificarTudo);
+        if (latInput) latInput.addEventListener('change', verificarTudo);
+
+        if (suggestionEl) {
+            suggestionEl.addEventListener('click', function () {
+                if (!sugestaoAtual || !sugestaoAtual.category_id || !categoryEl) return;
+                categoryEl.value = String(sugestaoAtual.category_id);
+                alternar(suggestionEl, false);
+                verificarTudo();
+            });
+        }
+
+        // --- Análise da fotografia assim que é escolhida -------------------
+        if (photoInput) {
+            photoInput.addEventListener('change', async function () {
+                var ficheiro = photoInput.files ? photoInput.files[0] : null;
+
+                if (previewEl) {
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
+                    if (ficheiro) {
+                        previewUrl = URL.createObjectURL(ficheiro);
+                        previewEl.src = previewUrl;
+                        alternar(previewEl, true);
+                    } else {
+                        previewUrl = null;
+                        previewEl.removeAttribute('src');
+                        alternar(previewEl, false);
+                    }
+                }
+
+                if (!ficheiro) return;
+
+                alternar(photoNote, false);
+                alternar(photoAnalyzing, true);
+
+                var formData = new FormData();
+                formData.append('photo', ficheiro);
+                formData.append('description', descriptionEl.value.trim());
+
+                var resultado = await postForm(apiBase + '/ai/analyze-photo', formData);
+                var dados = resultado && resultado.data;
+
+                alternar(photoAnalyzing, false);
+
+                if (!dados || !dados.category_id) return;
+
+                if (categoryEl) categoryEl.value = String(dados.category_id);
+
+                if (photoNote) {
+                    photoNote.textContent = 'A IA identificou “' + dados.category_name + '” na fotografia.'
+                        + (dados.severity === 'alta' ? ' Parece um caso mais grave.' : '')
+                        + ' Podes corrigir se não for isso.';
+                    alternar(photoNote, true);
+                }
+
+                runDuplicateCheck();
+            });
         }
     });
 
-    // Pré-visualização da fotografia escolhida pelo cidadão
-    const previewImg = document.createElement('img');
-    previewImg.id = 'photo-preview';
-    previewImg.className = 'hidden w-36 h-36 object-cover rounded-xl border border-jacaranda-200 mt-2.5 shadow-sm';
-    photoInput.parentNode.appendChild(previewImg);
+    // --- Prevenção de duplo envio ------------------------------------------
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.querySelector('form[action$="/denuncias"]');
+        if (!form) return;
 
-    photoInput.addEventListener('change', () => {
-        const file = photoInput.files?.[0];
-        if (file) {
-            previewImg.src = URL.createObjectURL(file);
-            previewImg.classList.remove('hidden');
-        } else {
-            previewImg.classList.add('hidden');
-        }
+        form.addEventListener('submit', function () {
+            var botao = form.querySelector('button[type="submit"]');
+            if (!botao || botao.disabled) return;
+            botao.disabled = true;
+            botao.dataset.original = botao.textContent;
+            botao.textContent = 'A enviar denúncia…';
+            botao.classList.add('opacity-60', 'cursor-not-allowed');
+        });
     });
-});
-
-// Prevenção de duplo envio de formulário
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form[action$="/denuncias"]');
-    if (!form) return;
-
-    form.addEventListener('submit', () => {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'A enviar denúncia...';
-            submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
-        }
-    });
-});
+})();
