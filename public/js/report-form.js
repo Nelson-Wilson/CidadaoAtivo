@@ -284,7 +284,7 @@
 
             if (descricaoAcceptBtn) {
                 descricaoAcceptBtn.disabled = true;
-                descricaoAcceptBtn.textContent = 'Aplicado ✓';
+                descricaoAcceptBtn.textContent = 'Aplicado';
             }
 
             atualizarFerramentasDescricao();
@@ -474,7 +474,7 @@
                     return;
                 }
 
-                botao.textContent = 'Confirmado ✓';
+                botao.textContent = 'Confirmado';
                 botao.classList.remove('bg-amber-500', 'hover:bg-amber-600');
                 botao.classList.add('bg-emerald-600');
                 container.appendChild(criarAvisoConfirmacao(match));

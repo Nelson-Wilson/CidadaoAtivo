@@ -96,7 +96,7 @@ router.post('/tecnico/tarefas/:id/resolver', exigirPapel(Usuario.PAPEL_TECNICO),
     }
 
     let mensagem = 'Denúncia marcada como resolvida. O cidadão será notificado para avaliar.';
-    if (comentario) mensagem += ' 🤖 IA: ' + comentario;
+    if (comentario) mensagem += ' IA: ' + comentario;
 
     req.flashStatus(mensagem);
     res.redirect('/tecnico/tarefas');

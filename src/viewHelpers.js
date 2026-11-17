@@ -25,19 +25,21 @@ const ROLE_LABELS = {
     admin: 'Administrador',
 };
 
-const CATEGORY_ICONS = {
-    'Buracos': '🕳️',
-    'Iluminação Pública': '💡',
-    'Lixo': '🗑️',
-    'Água': '💧',
-    'Esgotos': '🚿',
-    'Semáforos': '🚦',
-    'Árvores Caídas': '🌳',
-    'Construções Perigosas': '🏚️',
-    'Animais Abandonados': '🐾',
-    'Vandalismo': '🎨',
-    'Segurança': '🛡️',
-    'Outros': '📍',
+// Ícones desenhados em SVG (traço) para manter a interface consistente e
+// sem depender de emojis, que variam de aspeto entre sistemas operativos.
+const CATEGORY_ICON_PATHS = {
+    'Buracos': '<path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>',
+    'Iluminação Pública': '<path d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/>',
+    'Lixo': '<path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>',
+    'Água': '<path d="M12 2.25c-3.5 3.9-6.75 7.75-6.75 11.25a6.75 6.75 0 0013.5 0c0-3.5-3.25-7.35-6.75-11.25z"/>',
+    'Esgotos': '<rect x="4.5" y="4.5" width="15" height="15" rx="2.25"/><path d="M8.25 9h7.5M8.25 12h7.5M8.25 15h7.5"/>',
+    'Semáforos': '<rect x="7.5" y="2.25" width="9" height="19.5" rx="2.25"/><circle cx="12" cy="7" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r="1.1" fill="currentColor" stroke="none"/>',
+    'Árvores Caídas': '<path d="M12 3l4.5 6h-3l4 5.25h-4.5V21h-2v-6.75H6.5l4-5.25h-3L12 3z"/>',
+    'Construções Perigosas': '<path d="M4.5 21V5.25A1.5 1.5 0 016 3.75h12a1.5 1.5 0 011.5 1.5V21M3 21h18M9 8.25h1.5m3 0H15M9 12h1.5m3 0H15M9 15.75h1.5m3 0H15M10.5 21v-3h3v3"/>',
+    'Animais Abandonados': '<circle cx="7.5" cy="7" r="1.5"/><circle cx="16.5" cy="7" r="1.5"/><circle cx="5" cy="11.5" r="1.3"/><circle cx="19" cy="11.5" r="1.3"/><path d="M12 11.25c-2.1 0-4.25 2.05-4.25 4.15 0 1.42 1.05 2.45 2.4 2.45.75 0 1.25-.35 1.85-.35s1.1.35 1.85.35c1.35 0 2.4-1.03 2.4-2.45 0-2.1-2.15-4.15-4.25-4.15z"/>',
+    'Vandalismo': '<path d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/>',
+    'Segurança': '<path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>',
+    'Outros': '<path d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>',
 };
 
 const CATEGORY_TONES = {
@@ -112,8 +114,9 @@ function priorityClasses(priority) {
     return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800';
 }
 
-function categoryIcon(name) {
-    return CATEGORY_ICONS[name] || '📍';
+function categoryIcon(name, classes = 'h-5 w-5') {
+    const caminho = CATEGORY_ICON_PATHS[name] || CATEGORY_ICON_PATHS.Outros;
+    return `<svg class="${classes}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${caminho}</svg>`;
 }
 
 function categoryTone(name) {

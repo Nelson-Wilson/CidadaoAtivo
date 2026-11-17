@@ -85,7 +85,7 @@
         if (Number(report.votes) > 0) {
             var votos = document.createElement('p');
             votos.className = 'text-[10px] font-semibold text-blue-600 dark:text-blue-400';
-            votos.textContent = '👍 ' + Number(report.votes) + ' confirmação(ões)';
+            votos.textContent = Number(report.votes) + ' confirmação(ões)';
             caixa.appendChild(votos);
         }
 
@@ -152,7 +152,7 @@
         if (Number(report.votes) > 0) {
             var votos = document.createElement('span');
             votos.className = 'mt-1 block text-[10px] font-semibold text-blue-600 dark:text-blue-400';
-            votos.textContent = '👍 ' + Number(report.votes) + ' confirmação(ões)';
+            votos.textContent = Number(report.votes) + ' confirmação(ões)';
             corpo.appendChild(votos);
         }
 
