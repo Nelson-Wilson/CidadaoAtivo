@@ -10,12 +10,7 @@
     <div>
         <span class="ca-eyebrow">Registo de ocorrência</span>
         <h1 class="ca-page-title mt-1">Nova denúncia</h1>
-        <p class="ca-muted mt-1">Descreve o problema, confirma o local e anexa uma fotografia. Leva menos de dois minutos.</p>
     </div>
-    <span class="ca-chip self-start sm:self-auto">
-        <svg class="h-3.5 w-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        Dados protegidos
-    </span>
 </div>
 
 <div class="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
@@ -46,7 +41,7 @@
                 <input type="file" name="photo" id="photo" accept="image/jpeg,image/png,image/webp" capture="environment" required
                        class="block w-full cursor-pointer text-sm text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700 dark:text-slate-300 dark:file:bg-blue-600">
                 <p class="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-                    Tira uma fotografia clara do problema. A IA pode sugerir a categoria automaticamente, mas a decisão final é sempre tua.
+                    Foto clara do problema. A IA pode sugerir a categoria; a decisão é tua.
                 </p>
 
                 <img id="photo-preview" alt="Pré-visualização da fotografia" class="mt-4 hidden h-40 w-56 rounded-xl border border-slate-200 object-cover shadow-sm dark:border-slate-700">
@@ -65,7 +60,6 @@
                 <span class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">2</span>
                 <div>
                     <h2 class="font-display text-base font-bold text-slate-900 dark:text-white">Detalhes do problema</h2>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Quanto mais contexto, mais rápida é a triagem.</p>
                 </div>
             </div>
 
@@ -108,7 +102,7 @@
                             </button>
                         </div>
                         <p id="ai-description-hint" class="text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-                            Escreve pelo menos 10 caracteres ou anexa uma foto para receber uma sugestão.
+                            Escreve pelo menos 10 caracteres ou anexa uma foto.
                         </p>
                         <div id="ai-description-panel" class="hidden rounded-xl border border-violet-200 bg-violet-50 p-3 dark:border-violet-800 dark:bg-violet-950/40" aria-live="polite">
                             <div class="flex items-start justify-between gap-3">
@@ -131,7 +125,7 @@
                                 </button>
                             </div>
                             <p class="mt-2 text-[10px] leading-relaxed text-violet-500 dark:text-violet-300">
-                                A sugestão é gerada pelo Google Gemini e só é enviada quando clicas num dos botões.
+                                Sugestão gerada por IA. Só é aplicada se aceitares.
                             </p>
                         </div>
                         <p id="ai-description-error" class="hidden text-[11px] font-medium text-rose-600 dark:text-rose-400"></p>
@@ -151,12 +145,9 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zm0 0h-.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Ocorrências perto deste local
                     </div>
-                    <p class="mb-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
-                        A verificação usa a localização obtida por GPS ou marcada no mapa. Não precisas de escrever a descrição primeiro.
-                    </p>
                     <div id="duplicate-list" class="space-y-2"></div>
                     <p class="mt-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
-                        Se for o mesmo problema, confirma a ocorrência existente. Se for diferente, continua e envia a tua denúncia.
+                        Se for o mesmo problema, confirma a ocorrência existente.
                     </p>
                 </div>
 
@@ -190,7 +181,7 @@
 
         <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p class="text-center text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 sm:text-left">
-                Ao enviar, autorizas que a fotografia e as coordenadas sejam partilhadas com os serviços municipais.
+                Ao enviar, partilhas a foto e as coordenadas com o município.
             </p>
             <button type="submit" class="ca-btn-primary w-full shrink-0 sm:w-auto">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
@@ -230,18 +221,8 @@
                 Privacidade
             </h2>
             <p class="mt-2 leading-relaxed">
-                O teu email e a palavra-passe nunca aparecem no mapa público. Apenas a fotografia, a descrição e as coordenadas são visíveis para os serviços municipais.
+                O teu email e a palavra-passe nunca são públicos. Foto, descrição e coordenadas ficam visíveis para o município.
             </p>
-        </section>
-
-        <section class="ca-card p-5">
-            <h2 class="text-xs font-bold text-slate-800 dark:text-slate-100">Precisas de ajuda?</h2>
-            <p class="mt-1.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-                O assistente virtual explica o fluxo, os estados e os prazos possíveis.
-            </p>
-            <button type="button" data-chatbot-open class="ca-btn-secondary mt-3 w-full text-xs">
-                Abrir assistente virtual
-            </button>
         </section>
     </aside>
 </div>

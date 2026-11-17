@@ -188,11 +188,11 @@
                 if (pedidoDescricaoEmCurso) {
                     descricaoHintEl.textContent = 'A IA está a preparar uma sugestão…';
                 } else if (temTexto) {
-                    descricaoHintEl.textContent = 'Revê sempre a sugestão antes de a usares.';
+                    descricaoHintEl.textContent = 'Revê a sugestão antes de a usares.';
                 } else if (temFoto) {
-                    descricaoHintEl.textContent = 'Podes pedir uma sugestão com base na foto ou escrever pelo menos 10 caracteres.';
+                    descricaoHintEl.textContent = 'Podes pedir uma sugestão com base na foto.';
                 } else {
-                    descricaoHintEl.textContent = 'Escreve pelo menos 10 caracteres ou anexa uma foto para receber uma sugestão.';
+                    descricaoHintEl.textContent = 'Escreve pelo menos 10 caracteres ou anexa uma foto.';
                 }
             }
         }
