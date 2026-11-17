@@ -1,0 +1,40 @@
+<!-- Mensagens flash -->
+<%
+    const temStatus = typeof status !== 'undefined' && status;
+    const temErros = typeof errors !== 'undefined' && errors && errors.length;
+%>
+<% if (temStatus || temErros) { %>
+    <div class="fixed right-4 top-20 z-[60] flex w-[min(92vw,26rem)] flex-col gap-2" aria-live="polite">
+        <% if (temStatus) { %>
+            <div data-toast class="ca-toast border-emerald-200 bg-emerald-50/95 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/90 dark:text-emerald-100">
+                <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                    </svg>
+                </span>
+                <p class="flex-1 text-sm font-medium leading-relaxed"><%= status %></p>
+                <button type="button" data-dismiss class="rounded-lg p-1 text-emerald-700/70 transition hover:bg-emerald-100 hover:text-emerald-900 dark:text-emerald-300/70 dark:hover:bg-emerald-900" aria-label="Fechar aviso">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        <% } %>
+        <% if (temErros) { %>
+            <div data-toast role="alert" class="ca-toast border-rose-200 bg-rose-50/95 text-rose-900 dark:border-rose-800 dark:bg-rose-950/90 dark:text-rose-100">
+                <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-600 text-white">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008zM10.29 3.86L1.82 18a2.25 2.25 0 001.95 3.38h16.46a2.25 2.25 0 001.95-3.38L13.71 3.86a2.25 2.25 0 00-3.42 0z"/>
+                    </svg>
+                </span>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold">Não foi possível concluir:</p>
+                    <ul class="mt-1 list-disc space-y-0.5 pl-4 text-xs leading-relaxed">
+                        <% errors.forEach(function(error) { %><li><%= error %></li><% }) %>
+                    </ul>
+                </div>
+                <button type="button" data-dismiss class="rounded-lg p-1 text-rose-700/70 transition hover:bg-rose-100 hover:text-rose-900 dark:text-rose-300/70 dark:hover:bg-rose-900" aria-label="Fechar aviso">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        <% } %>
+    </div>
+<% } %>

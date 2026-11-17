@@ -1,13 +1,4 @@
-<%- include('../../layouts/header') %>
-
-<nav class="mb-5 flex items-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500" aria-label="Navegação estrutural">
-    <a href="<%= url('/tecnico/tarefas') %>" class="inline-flex items-center gap-1 transition hover:text-blue-600 dark:hover:text-blue-400">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-        Minhas tarefas
-    </a>
-    <span aria-hidden="true">/</span>
-    <span class="text-slate-700 dark:text-slate-200">Tarefa #<%= report.id %></span>
-</nav>
+<%- include('../../layouts/app-header') %>
 
 <header class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
@@ -159,4 +150,4 @@
     </div>
 </div>
 
-<%- include('../../layouts/footer') %>
+<%- include('../../layouts/app-footer') %>

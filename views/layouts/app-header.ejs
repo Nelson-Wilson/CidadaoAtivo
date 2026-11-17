@@ -1,0 +1,232 @@
+<%- include('head') %>
+
+<%
+    const pathAtual = typeof currentPath !== 'undefined' ? currentPath : '';
+    const papel = usuarioAtual.role;
+    const ehAdmin = papel === 'admin';
+    const ehMunicipio = papel === 'municipio' || ehAdmin;
+    const ehTecnico = papel === 'tecnico';
+    const ehCidadao = papel === 'cidadao';
+
+    const minhasAtivo = ehCidadao && pathAtual.indexOf('/denuncias') === 0 && pathAtual !== '/denuncias/nova';
+    const tarefasAtivo = ehTecnico && pathAtual.indexOf('/tecnico') === 0;
+    const dashboardAtivo = pathAtual.indexOf('/municipio/dashboard') === 0;
+    const gestaoAtivo = pathAtual.indexOf('/municipio/denuncias') === 0;
+    const relatorioAtivo = pathAtual.indexOf('/municipio/relatorio') === 0;
+    const categoriasAtivo = pathAtual.indexOf('/admin/categorias') === 0;
+    const utilizadoresAtivo = pathAtual.indexOf('/admin/utilizadores') === 0;
+
+    // Migalhas: raiz do sistema, secção e página atual.
+    const migalhas = [];
+    if (ehTecnico) {
+        migalhas.push({ texto: 'Início', href: '/dashboard' });
+        migalhas.push({ texto: 'Minhas tarefas', href: '/tecnico/tarefas' });
+        if (pathAtual !== '/tecnico/tarefas') {
+            migalhas.push({ texto: typeof title !== 'undefined' ? title : 'Tarefa' });
+        }
+    } else if (ehMunicipio) {
+        migalhas.push({ texto: 'Dashboard', href: '/municipio/dashboard' });
+        if (pathAtual.indexOf('/municipio/denuncias') === 0) {
+            migalhas.push({ texto: 'Gestão de ocorrências', href: '/municipio/denuncias' });
+            if (pathAtual !== '/municipio/denuncias') {
+                migalhas.push({ texto: typeof title !== 'undefined' ? title : 'Denúncia' });
+            }
+        } else if (pathAtual.indexOf('/municipio/relatorio') === 0) {
+            migalhas.push({ texto: 'Relatório executivo' });
+        } else if (pathAtual.indexOf('/admin') === 0) {
+            migalhas.push({ texto: 'Administração' });
+            migalhas.push({ texto: typeof title !== 'undefined' ? title : 'Gestão' });
+        }
+    } else {
+        migalhas.push({ texto: 'Início', href: '/dashboard' });
+        migalhas.push({ texto: 'As minhas denúncias', href: '/denuncias' });
+        if (pathAtual === '/denuncias/nova') {
+            migalhas.push({ texto: 'Nova denúncia' });
+        } else if (pathAtual !== '/denuncias') {
+            migalhas.push({ texto: typeof title !== 'undefined' ? title : 'Denúncia' });
+        }
+    }
+
+    function classeNav(ativo) {
+        return 'ca-sidebar-link' + (ativo ? ' ca-sidebar-link-active' : '');
+    }
+%>
+
+<div class="flex min-h-screen flex-1 flex-col lg:pl-72 print:pl-0">
+    <!-- Overlay mobile -->
+    <div data-sidebar-overlay class="fixed inset-0 z-[1100] hidden bg-slate-950/50 backdrop-blur-sm lg:hidden print:hidden" aria-hidden="true"></div>
+
+    <!-- Sidebar -->
+    <aside id="app-sidebar" data-sidebar aria-label="Menu do sistema"
+           class="fixed inset-y-0 left-0 z-[1200] flex w-72 -translate-x-full flex-col border-r border-slate-200 bg-white transition-transform duration-200 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0 print:hidden">
+        <div class="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 dark:border-slate-800">
+            <a href="<%= url('/dashboard') %>" class="flex min-w-0 items-center gap-2.5" aria-label="Cidadão Ativo — início do sistema">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-sm">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z"/>
+                        <circle cx="12" cy="10" r="2.5"/>
+                    </svg>
+                </span>
+                <span class="min-w-0">
+                    <span class="block truncate font-display text-sm font-bold tracking-tight text-slate-900 dark:text-white">Cidadão Ativo</span>
+                    <span class="hidden truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 lg:block">Sistema de gestão urbana</span>
+                </span>
+            </a>
+            <button type="button" data-sidebar-close class="ca-btn-ghost h-9 w-9 p-0 lg:hidden" aria-label="Fechar menu">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <% if (ehCidadao) { %>
+            <div class="px-4 pt-4">
+                <a href="<%= url('/denuncias/nova') %>" class="ca-btn-primary w-full text-xs">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    Nova denúncia
+                </a>
+            </div>
+        <% } else if (ehMunicipio) { %>
+            <div class="px-4 pt-4">
+                <a href="<%= url('/municipio/denuncias') %>" class="ca-btn-primary w-full text-xs">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg>
+                    Gerir ocorrências
+                </a>
+            </div>
+        <% } %>
+
+        <nav class="ca-no-scrollbar flex-1 overflow-y-auto px-3 pb-4 pt-1" aria-label="Navegação principal">
+            <% if (ehCidadao) { %>
+                <p class="ca-sidebar-label">Geral</p>
+                <a href="<%= url('/inicio') %>" target="_blank" rel="noopener" class="ca-sidebar-link">
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                    <span class="flex-1">Mapa público</span>
+                    <svg class="h-3.5 w-3.5 shrink-0 text-slate-300 dark:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                </a>
+
+                <p class="ca-sidebar-label">Participação</p>
+                <a href="<%= url('/denuncias') %>" class="<%= classeNav(minhasAtivo) %>"<% if (minhasAtivo) { %> aria-current="page"<% } %>>
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>As minhas denúncias</span>
+                </a>
+            <% } else if (ehTecnico) { %>
+                <p class="ca-sidebar-label">Operação</p>
+                <a href="<%= url('/tecnico/tarefas') %>" class="<%= classeNav(tarefasAtivo) %>"<% if (tarefasAtivo) { %> aria-current="page"<% } %>>
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Minhas tarefas</span>
+                </a>
+
+                <p class="ca-sidebar-label">Geral</p>
+                <a href="<%= url('/inicio') %>" target="_blank" rel="noopener" class="ca-sidebar-link">
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                    <span class="flex-1">Mapa público</span>
+                    <svg class="h-3.5 w-3.5 shrink-0 text-slate-300 dark:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                </a>
+            <% } else { %>
+                <p class="ca-sidebar-label">Visão geral</p>
+                <a href="<%= url('/municipio/dashboard') %>" class="<%= classeNav(dashboardAtivo) %>"<% if (dashboardAtivo) { %> aria-current="page"<% } %>>
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                    <span>Dashboard</span>
+                </a>
+
+                <p class="ca-sidebar-label">Operação</p>
+                <a href="<%= url('/municipio/denuncias') %>" class="<%= classeNav(gestaoAtivo) %>"<% if (gestaoAtivo) { %> aria-current="page"<% } %>>
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg>
+                    <span>Gestão de ocorrências</span>
+                </a>
+                <a href="<%= url('/municipio/relatorio') %>" class="<%= classeNav(relatorioAtivo) %>"<% if (relatorioAtivo) { %> aria-current="page"<% } %>>
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                    <span>Relatório executivo</span>
+                </a>
+                <a href="<%= url('/municipio/exportar.csv') %>" class="ca-sidebar-link">
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    <span>Exportar CSV</span>
+                </a>
+
+                <p class="ca-sidebar-label">Plataforma</p>
+                <a href="<%= url('/inicio') %>" target="_blank" rel="noopener" class="ca-sidebar-link">
+                    <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                    <span class="flex-1">Mapa público</span>
+                    <svg class="h-3.5 w-3.5 shrink-0 text-slate-300 dark:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                </a>
+
+                <% if (ehAdmin) { %>
+                    <p class="ca-sidebar-label">Administração</p>
+                    <a href="<%= url('/admin/categorias') %>" class="<%= classeNav(categoriasAtivo) %>"<% if (categoriasAtivo) { %> aria-current="page"<% } %>>
+                        <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg>
+                        <span>Categorias e SLA</span>
+                    </a>
+                    <a href="<%= url('/admin/utilizadores') %>" class="<%= classeNav(utilizadoresAtivo) %>"<% if (utilizadoresAtivo) { %> aria-current="page"<% } %>>
+                        <svg class="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                        <span>Utilizadores</span>
+                    </a>
+                <% } %>
+            <% } %>
+
+            <p class="ca-sidebar-label">Apoio</p>
+            <button type="button" data-chatbot-open class="ca-sidebar-link">
+                <svg class="h-[18px] w-[18px] shrink-0 text-violet-500 dark:text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+                <span>Assistente virtual</span>
+            </button>
+        </nav>
+
+        <div class="shrink-0 border-t border-slate-100 p-3 dark:border-slate-800">
+            <div class="mb-2 flex items-center gap-2 px-2 text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                <span class="relative flex h-1.5 w-1.5">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+                    <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                </span>
+                Sistema operacional
+            </div>
+            <div class="flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 dark:border-slate-800">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-[11px] font-bold text-white"><%= initials(usuarioAtual.name) %></span>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-xs font-semibold text-slate-800 dark:text-slate-100"><%= usuarioAtual.name %></p>
+                    <p class="truncate text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500"><%= roleLabel(papel) %></p>
+                </div>
+                <form method="POST" action="<%= url('/logout') %>">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="ca-btn-ghost h-8 w-8 p-0 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-950/40 dark:hover:text-rose-300" title="Terminar sessão" aria-label="Terminar sessão">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Topbar -->
+    <header class="sticky top-0 z-[1000] border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 print:hidden">
+        <div class="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+            <div class="flex min-w-0 items-center gap-2">
+                <button type="button" data-sidebar-toggle class="ca-btn-ghost h-9 w-9 p-0 lg:hidden" aria-label="Abrir menu" aria-expanded="false" aria-controls="app-sidebar">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                </button>
+
+                <nav class="flex min-w-0 items-center gap-2 text-xs" aria-label="Navegação estrutural">
+                    <% migalhas.forEach(function(migalha, indice) { %>
+                        <% if (indice > 0) { %>
+                            <svg class="h-3 w-3 shrink-0 text-slate-300 dark:text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        <% } %>
+                        <% if (migalha.href && indice < migalhas.length - 1) { %>
+                            <a href="<%= url(migalha.href) %>" class="truncate text-slate-500 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"><%= migalha.texto %></a>
+                        <% } else { %>
+                            <span class="truncate font-semibold text-slate-800 dark:text-slate-100" aria-current="page"><%= migalha.texto %></span>
+                        <% } %>
+                    <% }); %>
+                </nav>
+            </div>
+
+            <div class="flex shrink-0 items-center gap-1.5">
+                <button type="button" data-chatbot-open class="ca-btn-ghost h-9 px-2.5" title="Abrir assistente virtual" aria-label="Abrir assistente virtual">
+                    <svg class="h-4 w-4 text-violet-600 dark:text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+                    <span class="hidden text-xs sm:inline">Assistente</span>
+                </button>
+                <button type="button" data-theme-toggle class="ca-btn-ghost h-9 w-9 p-0" aria-label="Alternar tema" aria-pressed="false" title="Alternar tema">
+                    <svg class="h-4 w-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0112 21.75 9.75 9.75 0 013.75 12c0-4.27 2.75-7.89 6.55-9.15a.75.75 0 01.95.95A7.5 7.5 0 0020.8 14.05a.75.75 0 01.95.95z"/></svg>
+                    <svg class="hidden h-4 w-4 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <%- include('_flash') %>
+
+    <main id="conteudo" class="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
