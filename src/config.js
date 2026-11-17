@@ -128,6 +128,7 @@ const config = {
         timeoutMs: parseInt(process.env.AI_TIMEOUT_MS || '20000', 10),
         features: {
             classification: (process.env.AI_FEATURE_CLASSIFICATION ?? 'true') !== 'false',
+            descriptionHelper: (process.env.AI_FEATURE_DESCRIPTION_HELPER ?? 'true') !== 'false',
             duplicates: (process.env.AI_FEATURE_DUPLICATES ?? 'true') !== 'false',
             summary: (process.env.AI_FEATURE_SUMMARY ?? 'true') !== 'false',
             priority: (process.env.AI_FEATURE_PRIORITY ?? 'true') !== 'false',
@@ -137,6 +138,7 @@ const config = {
             executiveReport: (process.env.AI_FEATURE_EXECUTIVE_REPORT ?? 'true') !== 'false',
         },
         duplicateRadiusKm: parseFloat(process.env.AI_DUPLICATE_RADIUS_KM || '0.3'),
+        descriptionMaxChars: parseInt(process.env.AI_DESCRIPTION_MAX_CHARS || '600', 10),
     },
 };
 

@@ -52,8 +52,8 @@ Antes de publicar, valide tudo com `npm run preflight` (base de dados, schema/RL
    | Sessão | `SESSION_SECRET` |
    | Base de dados | `DATABASE_URL`, `DB_POOL_MAX` |
    | Fotografias | `STORAGE_DRIVER`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET`, `UPLOAD_MAX_BYTES` |
-   | IA | `GEMINI_API_KEY`, `AI_API_URL`, `AI_MODEL`, `AI_MODEL_FALLBACK`, `AI_THINKING_LEVEL`, `AI_TIMEOUT_MS`, `AI_FEATURE_*`, `AI_DUPLICATE_RADIUS_KM` |
-   | Limites | `AUTH_RATE_LIMIT_MAX`, `COMMENT_RATE_LIMIT_MAX`, `CHATBOT_RATE_LIMIT_MAX`, `AI_RATE_LIMIT_MAX`, `REPORT_RATE_LIMIT_MAX` |
+   | IA | `GEMINI_API_KEY`, `AI_API_URL`, `AI_MODEL`, `AI_MODEL_FALLBACK`, `AI_THINKING_LEVEL`, `AI_TIMEOUT_MS`, `AI_FEATURE_*`, `AI_DUPLICATE_RADIUS_KM`, `AI_DESCRIPTION_MAX_CHARS` |
+   | Limites | `AUTH_RATE_LIMIT_MAX`, `COMMENT_RATE_LIMIT_MAX`, `CHATBOT_RATE_LIMIT_MAX`, `AI_RATE_LIMIT_MAX`, `AI_DESCRIPTION_RATE_LIMIT_MAX`, `REPORT_RATE_LIMIT_MAX` |
 
    O `APP_URL` vem como `https://cidadao-ativo-beta.vercel.app` (domínio de produção atual). Se o projeto novo tiver outro domínio, altere apenas essa linha no `.env`, volte a correr `npm run env:vercel` e importe novamente.
 

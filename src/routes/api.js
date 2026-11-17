@@ -10,6 +10,7 @@ const { formatarData } = require('../viewHelpers');
 const { verifyCsrfHeader } = require('../csrf');
 const { criarRateLimiter } = require('../rateLimit');
 const servicoClassificacao = require('../services/ai/servicoClassificacao');
+const servicoDescricao = require('../services/ai/servicoDescricao');
 const servicoDeteccaoDuplicados = require('../services/ai/servicoDeteccaoDuplicados');
 const servicoAnaliseFoto = require('../services/ai/servicoAnaliseFoto');
 const servicoChatbot = require('../services/ai/servicoChatbot');
@@ -32,6 +33,17 @@ const aiLimiter = criarRateLimiter({
     standardHeaders: true,
     legacyHeaders: false,
     message: { status: 'error', message: 'Limite de pedidos de IA atingido. Tenta novamente dentro de 1 minuto.' },
+});
+
+// As sugestões de descrição são pedidas por clique: um limite mais apertado
+// protege a quota gratuita do Gemini sem atrapalhar a utilização normal.
+const descriptionLimiter = criarRateLimiter({
+    namespace: 'ai-description',
+    windowMs: 60 * 1000,
+    max: parseInt(process.env.AI_DESCRIPTION_RATE_LIMIT_MAX || '8', 10),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { status: 'error', message: 'Limite de sugestões de descrição atingido. Tenta novamente dentro de 1 minuto.' },
 });
 
 // Upload em memória: as fotos só são usadas para análise e nunca tocam no disco.
@@ -121,23 +133,62 @@ router.post('/api/ai/analyze-photo', aiLimiter, exigirAutenticacao, memoryUpload
     }
 });
 
+// --- IA: melhoria, resumo ou sugestão de descrição (opt-in) ---
+router.post('/api/ai/description', descriptionLimiter, exigirAutenticacao, memoryUpload.single('photo'), verifyCsrfHeader, async (req, res) => {
+    const body = req.body || {};
+    const modo = String(body.mode || 'improve').trim().toLowerCase();
+    const descricao = String(body.description || '').trim();
+    const idCategoria = Number(body.category_id || 0) || null;
+    const bairro = String(body.neighborhood || '').trim().slice(0, 120);
+
+    try {
+        const resultado = await servicoDescricao.sugerir({
+            modo,
+            descricao,
+            idCategoria,
+            bairro,
+            foto: req.file ? { buffer: req.file.buffer, mimetype: req.file.mimetype } : null,
+        });
+
+        if (!resultado) return res.json({ message: 'ok', data: null });
+
+        return res.json({
+            message: 'ok',
+            data: { suggestion: resultado.sugestao, mode: resultado.modo },
+        });
+    } catch (err) {
+        console.error('[IA descrição] Falha ao gerar sugestão:', err.message);
+        return res.json({ message: 'ok', data: null });
+    }
+});
+
 // --- IA: verificação de duplicados ---
 router.post('/api/ai/duplicates', aiLimiter, exigirAutenticacao, memoryUpload.single('photo'), verifyCsrfHeader, async (req, res) => {
-    const idCategoria = Number(req.body.category_id || 0);
-    const lat = parseFloat(req.body.latitude || 0);
-    const lng = parseFloat(req.body.longitude || 0);
-    const descricao = (req.body.description || '').trim();
+    const body = req.body || {};
+    const idCategoria = Number(body.category_id || 0) || null;
+    const lat = Number.parseFloat(body.latitude);
+    const lng = Number.parseFloat(body.longitude);
+    const descricao = String(body.description || '').trim();
 
-    if (!idCategoria || !lat || !lng || descricao.length < 10) {
+    // A localização é o único dado obrigatório: categoria e descrição são
+    // opcionais e servem apenas para reforçar a pontuação.
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)
+        || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
         return res.json({ message: 'ok', data: [] });
     }
 
-    const correspondencias = await servicoDeteccaoDuplicados.procurarPossiveisDuplicados(idCategoria, lat, lng, descricao);
+    const correspondencias = await servicoDeteccaoDuplicados.procurarPossiveisDuplicados({
+        idCategoria,
+        lat,
+        lng,
+        descricao,
+    });
 
     const dados = [];
     for (let i = 0; i < correspondencias.length; i++) {
         const correspondencia = correspondencias[i];
         const denuncia = correspondencia.denuncia;
+        const textoDenuncia = denuncia.description || '';
 
         let iaEhMesmo = null;
         let iaRaciocinio = null;
@@ -151,11 +202,15 @@ router.post('/api/ai/duplicates', aiLimiter, exigirAutenticacao, memoryUpload.si
 
         dados.push({
             report_id: denuncia.id,
-            description: denuncia.description.length > 100 ? denuncia.description.slice(0, 100) + '…' : denuncia.description,
+            category_name: denuncia.category_name || null,
+            description: textoDenuncia.length > 100 ? textoDenuncia.slice(0, 100) + '…' : textoDenuncia,
             photo_url: denuncia.photo_path ? urlApp(denuncia.photo_path) : null,
             status: denuncia.status,
             distance_km: correspondencia.distancia_km,
             score: correspondencia.pontuacao,
+            confidence: correspondencia.confianca,
+            same_category: correspondencia.mesma_categoria,
+            text_similarity: correspondencia.semelhanca_texto,
             confirmations_count: denuncia.confirmations_count || 0,
             ai_same: iaEhMesmo,
             ai_reasoning: iaRaciocinio,

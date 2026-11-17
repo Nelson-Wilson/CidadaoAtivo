@@ -1,14 +1,22 @@
 const Denuncia = require('../../models/Denuncia');
 const config = require('../../config');
 
-const LIMITE_PONTUACAO = 0.45;
+const LIMITE_RESULTADOS = 5;
+const PESO_DISTANCIA = 0.6;
+const PESO_TEXTO = 0.25;
+const PESO_CATEGORIA = 0.15;
 
 function estaAtivo() {
     return config.ai.features.duplicates;
 }
 
 function normalizar(texto) {
-    return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return String(texto || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 /**
@@ -47,37 +55,90 @@ function haversineKm(lat1, lng1, lat2, lng2) {
     return raioTerraKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** @returns {Promise<Array<{denuncia: object, distancia_km: number, semelhanca_texto: number, pontuacao: number}>>} */
-async function procurarPossiveisDuplicados(idCategoria, lat, lng, descricao) {
-    if (!estaAtivo()) return [];
+function arredondar(valor, casas = 2) {
+    const factor = 10 ** casas;
+    return Math.round(valor * factor) / factor;
+}
 
-    const raioKm = config.ai.duplicateRadiusKm;
+/**
+ * A confiança é comunicada separadamente da pontuação para não dar a
+ * impressão de que dois pontos apenas próximos são o mesmo problema.
+ */
+function calcularConfianca({ temTexto, mesmaCategoria, semelhanca }) {
+    if (temTexto && mesmaCategoria && semelhanca >= 0.45) return 'alta';
+    if (temTexto && semelhanca >= 0.7) return 'alta';
+    if (mesmaCategoria) return 'media';
+    if (temTexto && semelhanca >= 0.35) return 'media';
+    return 'baixa';
+}
+
+/**
+ * Verificação "location-first": a localização é o único dado obrigatório.
+ * Categoria e descrição são opcionais e só reforçam a pontuação.
+ *
+ * @returns {Promise<Array<{
+ *   denuncia: object,
+ *   distancia_km: number,
+ *   semelhanca_texto: number|null,
+ *   pontuacao: number,
+ *   mesma_categoria: boolean|null,
+ *   confianca: 'alta'|'media'|'baixa'
+ * }>>}
+ */
+async function procurarPossiveisDuplicados({ idCategoria = null, lat, lng, descricao = '' } = {}) {
+    if (!estaAtivo()) return [];
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+
+    const raioKm = Number(config.ai.duplicateRadiusKm);
+    if (!Number.isFinite(raioKm) || raioKm <= 0) return [];
+
     const latDelta = raioKm / 111.0;
     const lngDelta = raioKm / (111.0 * Math.max(Math.cos(lat * Math.PI / 180), 0.1));
 
-    const candidatos = await Denuncia.candidatosParaVerificacaoDuplicados(idCategoria, lat, lng, latDelta, lngDelta);
+    const candidatos = await Denuncia.candidatosParaVerificacaoDuplicados(lat, lng, latDelta, lngDelta);
+
+    const texto = String(descricao || '').trim();
+    const temTexto = texto.length >= 10;
+    const categoriaId = Number(idCategoria) || null;
 
     const resultados = [];
     for (const denuncia of candidatos) {
         const distanciaKm = haversineKm(lat, lng, parseFloat(denuncia.latitude), parseFloat(denuncia.longitude));
-        if (distanciaKm > raioKm) continue;
+        if (!Number.isFinite(distanciaKm) || distanciaKm > raioKm) continue;
 
-        const semelhanca = semelhancaTexto(descricao, denuncia.description);
-        const pontuacaoDistancia = 1 - (distanciaKm / raioKm);
-        const pontuacao = (0.6 * pontuacaoDistancia) + (0.4 * semelhanca);
+        const semelhanca = temTexto ? semelhancaTexto(texto, denuncia.description || '') : null;
+        const mesmaCategoria = categoriaId !== null && Number(denuncia.category_id) === categoriaId;
 
-        if (pontuacao < LIMITE_PONTUACAO) continue;
+        // Média ponderada dos sinais disponíveis. Sem categoria nem texto,
+        // a pontuação é simplesmente a proximidade — o que permite mostrar
+        // ocorrências vizinhas mesmo antes de o cidadão escrever.
+        let soma = PESO_DISTANCIA * Math.max(0, 1 - (distanciaKm / raioKm));
+        let pesos = PESO_DISTANCIA;
+
+        if (temTexto) {
+            soma += PESO_TEXTO * semelhanca;
+            pesos += PESO_TEXTO;
+        }
+
+        if (categoriaId !== null) {
+            soma += PESO_CATEGORIA * (mesmaCategoria ? 1 : 0);
+            pesos += PESO_CATEGORIA;
+        }
+
+        const pontuacao = soma / pesos;
 
         resultados.push({
             denuncia,
-            distancia_km: Math.round(distanciaKm * 1000) / 1000,
-            semelhanca_texto: Math.round(semelhanca * 100) / 100,
-            pontuacao: Math.round(pontuacao * 100) / 100,
+            distancia_km: arredondar(distanciaKm, 3),
+            semelhanca_texto: semelhanca === null ? null : arredondar(semelhanca, 2),
+            pontuacao: arredondar(pontuacao, 2),
+            mesma_categoria: categoriaId === null ? null : mesmaCategoria,
+            confianca: calcularConfianca({ temTexto, mesmaCategoria, semelhanca: semelhanca || 0 }),
         });
     }
 
-    resultados.sort((a, b) => b.pontuacao - a.pontuacao);
-    return resultados.slice(0, 5);
+    resultados.sort((a, b) => b.pontuacao - a.pontuacao || a.distancia_km - b.distancia_km);
+    return resultados.slice(0, LIMITE_RESULTADOS);
 }
 
-module.exports = { estaAtivo, procurarPossiveisDuplicados };
+module.exports = { estaAtivo, procurarPossiveisDuplicados, calcularConfianca };

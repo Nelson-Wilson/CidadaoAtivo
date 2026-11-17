@@ -94,6 +94,7 @@ AI_MODEL_FALLBACK=${seguro(valor('AI_MODEL_FALLBACK', 'gemini-3.5-flash-lite'))}
 AI_THINKING_LEVEL=${seguro(valor('AI_THINKING_LEVEL', 'LOW'))}
 AI_TIMEOUT_MS=${seguro(valor('AI_TIMEOUT_MS', '20000'))}
 AI_FEATURE_CLASSIFICATION=${seguro(valor('AI_FEATURE_CLASSIFICATION', 'true'))}
+AI_FEATURE_DESCRIPTION_HELPER=${seguro(valor('AI_FEATURE_DESCRIPTION_HELPER', 'true'))}
 AI_FEATURE_DUPLICATES=${seguro(valor('AI_FEATURE_DUPLICATES', 'true'))}
 AI_FEATURE_SUMMARY=${seguro(valor('AI_FEATURE_SUMMARY', 'true'))}
 AI_FEATURE_PRIORITY=${seguro(valor('AI_FEATURE_PRIORITY', 'true'))}
@@ -102,12 +103,14 @@ AI_FEATURE_SMART_DASHBOARD=${seguro(valor('AI_FEATURE_SMART_DASHBOARD', 'true'))
 AI_FEATURE_PHOTO_ANALYSIS=${seguro(valor('AI_FEATURE_PHOTO_ANALYSIS', 'true'))}
 AI_FEATURE_EXECUTIVE_REPORT=${seguro(valor('AI_FEATURE_EXECUTIVE_REPORT', 'true'))}
 AI_DUPLICATE_RADIUS_KM=${seguro(valor('AI_DUPLICATE_RADIUS_KM', '0.3'))}
+AI_DESCRIPTION_MAX_CHARS=${seguro(valor('AI_DESCRIPTION_MAX_CHARS', '600'))}
 
 # --- Limites de pedidos (por IP) ------------------------------------------------
 AUTH_RATE_LIMIT_MAX=${seguro(valor('AUTH_RATE_LIMIT_MAX', '10'))}
 COMMENT_RATE_LIMIT_MAX=${seguro(valor('COMMENT_RATE_LIMIT_MAX', '20'))}
 CHATBOT_RATE_LIMIT_MAX=${seguro(valor('CHATBOT_RATE_LIMIT_MAX', '15'))}
 AI_RATE_LIMIT_MAX=${seguro(valor('AI_RATE_LIMIT_MAX', '30'))}
+AI_DESCRIPTION_RATE_LIMIT_MAX=${seguro(valor('AI_DESCRIPTION_RATE_LIMIT_MAX', '8'))}
 REPORT_RATE_LIMIT_MAX=${seguro(valor('REPORT_RATE_LIMIT_MAX', '5'))}
 `;
 

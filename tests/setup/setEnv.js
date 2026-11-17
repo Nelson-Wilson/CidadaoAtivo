@@ -19,6 +19,7 @@ process.env.COMMENT_RATE_LIMIT_MAX = '1000';
 process.env.REPORT_RATE_LIMIT_MAX = '1000';
 process.env.APP_URL = 'http://127.0.0.1:3000';
 process.env.AI_FEATURE_CLASSIFICATION = 'false';
+process.env.AI_FEATURE_DESCRIPTION_HELPER = 'false';
 process.env.AI_FEATURE_DUPLICATES = 'false';
 process.env.AI_FEATURE_SUMMARY = 'false';
 process.env.AI_FEATURE_PRIORITY = 'false';

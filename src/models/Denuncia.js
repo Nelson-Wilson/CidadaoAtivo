@@ -381,17 +381,18 @@ async function pontosCalor(idMunicipio, limite = 1000) {
     return rows;
 }
 
-/** Candidatos a duplicado — mesma categoria, bounding box por lat/lng. */
-async function candidatosParaVerificacaoDuplicados(idCategoria, lat, lng, deltaLat, deltaLng) {
+/** Candidatos a duplicado — qualquer categoria, bounding box por lat/lng. */
+async function candidatosParaVerificacaoDuplicados(lat, lng, deltaLat, deltaLng) {
     const { rows } = await db.query(
         `SELECT r.*,
+                c.name AS category_name,
                 (SELECT COUNT(*) FROM report_confirmations rc WHERE rc.report_id = r.id) AS confirmations_count
          FROM reports r
-         WHERE r.category_id = ?
-           AND r.status NOT IN ('fechada', 'rejeitada')
+         LEFT JOIN categories c ON c.id = r.category_id
+         WHERE r.status NOT IN ('fechada', 'rejeitada')
            AND r.latitude BETWEEN ? AND ?
            AND r.longitude BETWEEN ? AND ?`,
-        [idCategoria, lat - deltaLat, lat + deltaLat, lng - deltaLng, lng + deltaLng]
+        [lat - deltaLat, lat + deltaLat, lng - deltaLng, lng + deltaLng]
     );
     return rows;
 }

@@ -227,6 +227,7 @@ function exposeToViews(req, res, next) {
     res.locals.nl2br = nl2br;
     res.locals.currentPath = req.path;
     res.locals.appUrl = config.appUrl;
+    res.locals.aiDescriptionEnabled = config.ai.features.descriptionHelper && Boolean(config.ai.apiKey);
 
     // Aliases em português usados pelas views mais recentes.
     res.locals.prioridadeLabel = priorityLabel;
