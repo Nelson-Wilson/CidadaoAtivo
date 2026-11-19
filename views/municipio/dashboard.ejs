@@ -107,7 +107,8 @@
                 <p class="mt-0.5 text-lg font-bold text-slate-900 dark:text-white">
                     <% if (stats.tempo_medio_horas !== null) { %>
                         <%= stats.tempo_medio_horas %> h
-                        <span class="text-xs font-medium text-slate-400 dark:text-slate-500">(~<%= Math.round((stats.tempo_medio_horas / 24) * 10) / 10 %> dias)</span>
+                        <% const diasMedios = Math.round((stats.tempo_medio_horas / 24) * 10) / 10; %>
+                        <span class="text-xs font-medium text-slate-400 dark:text-slate-500">(~<%= diasMedios %> <%= diasMedios === 1 ? 'dia' : 'dias' %>)</span>
                     <% } else { %>
                         <span class="text-sm font-medium text-slate-400 dark:text-slate-500">A recolher dados</span>
                     <% } %>
@@ -164,7 +165,7 @@
             <%= stats.satisfacao_media !== null ? stats.satisfacao_media : '—' %>
             <% if (stats.satisfacao_media !== null) { %><span class="text-base text-amber-500">★</span><% } %>
         </p>
-        <p class="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500"><%= stats.avaliacoes %> avaliações registadas.</p>
+        <p class="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500"><%= stats.avaliacoes %> <%= stats.avaliacoes === 1 ? 'avaliação registada' : 'avaliações registadas' %>.</p>
     </div>
 </section>
 

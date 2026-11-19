@@ -18,3 +18,9 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 .vercel/
+
+# Python e artefactos do relatório
+__pycache__/
+*.pyc
+docs/relatorio/figuras_html/
+docs/~$*

@@ -1,0 +1,30 @@
+{
+  "buraco": {
+    "ficheiro": "File:Potholes on asphalt road 20171023.jpg",
+    "purl": "https://commons.wikimedia.org/wiki/File%3APotholes_on_asphalt_road_20171023.jpg",
+    "autor": "<a href=\"//commons.wikimedia.org/wiki/User:Zunter\" title=\"User:Zunter\">Santeri Viinamäki</a>",
+    "licenca": "CC BY-SA 4.0",
+    "bytes": 621692
+  },
+  "lixo": {
+    "ficheiro": "File:Garbage bags broken by crows in Tokyo.jpg",
+    "purl": "https://commons.wikimedia.org/wiki/File%3AGarbage_bags_broken_by_crows_in_Tokyo.jpg",
+    "autor": "<a href=\"//commons.wikimedia.org/wiki/User:Syced\" title=\"User:Syced\">Syced</a>",
+    "licenca": "CC0",
+    "bytes": 592670
+  },
+  "iluminacao": {
+    "ficheiro": "File:Damaged dangerous street light pole 20180524.jpg",
+    "purl": "https://commons.wikimedia.org/wiki/File%3ADamaged_dangerous_street_light_pole_20180524.jpg",
+    "autor": "<a href=\"//commons.wikimedia.org/wiki/User:Zunter\" title=\"User:Zunter\">Santeri Viinamäki</a>",
+    "licenca": "CC BY-SA 4.0",
+    "bytes": 307609
+  },
+  "agua": {
+    "ficheiro": "File:Leaking water pipe - Kings Orchard - geograph.org.uk - 8414903.jpg",
+    "purl": "https://commons.wikimedia.org/wiki/File%3ALeaking_water_pipe_-_Kings_Orchard_-_geograph.org.uk_-_8414903.jpg",
+    "autor": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.geograph.org.uk/profile/18677\">Mr Addlepated</a> <span class=\"mw-valign-text-top noprint\" typeof=\"mw:File/Frameless\"><a href=\"//commons.wikimedia.org/wiki/File:Leaking_water_pipe_-_Kings_Orchard_-_geograph.org.uk_-_8414903.jpg#P170\" title=\"Edit this at Structured Data on Commons\"><img alt=\"Edit this at Structured Data on Commons\" src=\"https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/OOjs_UI_icon_edit-ltr-progressive.svg/20px-OOjs_UI_icon_edit-ltr-progressive.svg.png?utm_source=commons.wikimedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail\" decoding=\"async\" loading=\"lazy\" width=\"10\" height=\"10\" class=\"mw-file-element\" data-file-width=\"20\" data-file-height=\"20\"></a></span>",
+    "licenca": "CC BY-SA 2.0",
+    "bytes": 999999
+  }
+}

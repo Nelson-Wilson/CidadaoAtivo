@@ -1,0 +1,298 @@
+UNIVERSIDADE EDUARDO MONDLANE
+Faculdade de Ciências
+Departamento de Matemática e Informática
+Licenciatura em Informática  -  Pós-laboral
+Engenharia de Software
+Trabalho 01
+Metodologias de Desenvolvimento de Software, Gestão de Projectos e Engenharia de Requisitos
+Caso de estudo: "Cidadão Ativo" -Plataforma de Reporte Urbano para o Conselho Municipal de Maputo
+Discentes:
+Aurélio Langa
+Nelson Dzimba
+Docente (Regente): Alfredo Muchanga
+Docente (Assistente): Momade Marcos H. Abdul
+Maputo, Setembro de 2026
+1. Contextualização
+A cidade de Maputo, capital de Moçambique, tem vindo a registar um crescimento urbano acelerado nas últimas décadas, impulsionado pelo êxodo rural e pela expansão dos bairros periféricos. Este crescimento nem sempre é acompanhado por um planeamento e manutenção de infraestruturas ao mesmo ritmo, gerando problemas recorrentes como buracos na via pública, acumulação de lixo, avarias na iluminação pública, rupturas na rede de saneamento e água, entre outros.
+O Conselho Municipal de Maputo (CMM), enquanto entidade responsável pela gestão destes serviços, enfrenta o desafio de identificar, priorizar e resolver estas ocorrências de forma eficiente, num contexto de recursos técnicos e financeiros limitados face à dimensão do território e da população servida.
+Paralelamente, verifica-se em Moçambique uma penetração crescente de dispositivos móveis e acesso à internet, criando uma oportunidade real para que a própria população participe activamente na identificação de problemas urbanos, através de plataformas digitais simples e acessíveis. É neste contexto que surge a proposta do sistema "Cidadão Ativo": uma plataforma que liga o cidadão comum ao Conselho Municipal, tornando o processo de reporte, acompanhamento e resolução de problemas urbanos mais transparente, rápido e orientado por dados.
+Este trabalho enquadra-se na unidade curricular de Engenharia de Software, aplicando de forma prática os conceitos de Engenharia de Requisitos e Gestão de Projectos de Software ao desenvolvimento deste sistema, desde a fase de levantamento de requisitos até à entrega de um protótipo funcional, desenvolvido de forma iterativa e incremental ao longo de três sprints.
+2. Problema que o Sistema Pretende Resolver
+Actualmente, o reporte de problemas urbanos ao Conselho Municipal de Maputo é feito, na sua maioria, de forma informal e não estruturada -através de chamadas telefónicas, deslocações presenciais às administrações distritais, ou redes sociais. Este processo apresenta várias limitações identificadas pela equipa:
+Ausência de um canal único e formal para o cidadão reportar uma ocorrência, com evidência fotográfica e localização exacta.
+Falta de rastreabilidade: o cidadão não tem forma de acompanhar o estado do problema que reportou, nem de saber se e quando será resolvido.
+Duplicação de esforços: vários cidadãos podem reportar, por vias diferentes, o mesmo problema, sem que o município tenha forma de os relacionar.
+Ausência de priorização objectiva: sem dados estruturados (localização, gravidade, tempo em aberto, número de queixas), é difícil ao município decidir o que resolver primeiro.
+Falta de transparência e prestação de contas perante o cidadão e a sociedade civil sobre o desempenho do município na resolução de problemas.
+Inexistência de dados agregados (por categoria, por bairro, por tempo médio de resolução) que apoiem a tomada de decisão e o planeamento de intervenções.
+O sistema "Cidadão Ativo" pretende resolver directamente estas lacunas, oferecendo uma plataforma web (preparada para acesso móvel) que permite ao cidadão reportar um problema com fotografia e localização GPS, acompanhar o seu estado até à resolução, e avaliar o serviço prestado -ao mesmo tempo que fornece ao Conselho Municipal ferramentas de gestão, atribuição de técnicos e um painel de estatísticas para apoio à decisão, complementadas por funcionalidades de Inteligência Artificial que automatizam a classificação, a deteção de duplicados e a priorização das ocorrências.
+3. Caso de Estudo / Entidade Responsável pelo Sistema
+A entidade responsável pelo sistema, e caso de estudo adoptado pelo grupo, é o Conselho Municipal de Maputo (CMM), órgão de governação autárquica responsável pela gestão dos serviços urbanos na cidade de Maputo, capital de Moçambique.
+
+[TABELA]
+Departamento | Categorias sob sua responsabilidade
+Departamento de Vias | Buracos, Semáforos, Construções Perigosas
+Departamento de Saneamento | Lixo, Esgotos, Água
+Departamento de Iluminação | Iluminação Pública
+Departamento de Ambiente e Segurança | Árvores Caídas, Animais Abandonados, Vandalismo, Segurança, Outros
+[/TABELA]
+
+Para efeitos deste trabalho, considerou-se que o CMM está organizado, no âmbito deste sistema, em quatro departamentos técnicos, cada um responsável por um conjunto de categorias de ocorrências:
+Esta estruturação permite que, no sistema, cada denúncia seja automaticamente encaminhada para o departamento tecnicamente responsável, com base na categoria do problema reportado, agilizando a atribuição de um técnico e a resolução da ocorrência.
+4. Papel e Função de Cada Elemento do Grupo
+O grupo é constituído por dois elementos, que trabalharam de forma colaborativa em todas as fases do projecto - desde o levantamento de requisitos até à implementação e documentação. Ainda assim, e conforme habitual em projectos de pequena equipa, houve uma divisão de responsabilidades principais, apresentada na tabela seguinte. Esta divisão não é estanque: ambos os elementos reviram e contribuíram para o trabalho um do outro em todas as fases.
+
+[TABELA]
+Elemento | Responsabilidades principais
+Aurélio Langa | Levantamento e análise de requisitos; condução da técnica de elicitação (entrevistas); elaboração do documento de especificação de requisitos; gestão do projecto (cronograma, registo e gestão de riscos, matriz de dependências); documentação e preparação da apresentação/defesa.
+Nelson Dzimba | Concepção da arquitectura do sistema e do modelo de dados; implementação do backend, frontend e integração das funcionalidades de Inteligência Artificial; definição dos casos de uso técnicos; testes funcionais do protótipo ao longo dos três sprints.
+[/TABELA]
+
+Nota: a distribuição acima reflecte a responsabilidade principal de cada elemento; as decisões de arquitectura, o planeamento das sprints e a validação dos requisitos foram sempre feitas em conjunto, através de sessões de trabalho e revisão cruzada.
+5. Principais Fontes de Requisitos do Sistema
+Os requisitos do sistema "Cidadão Ativo" foram recolhidos a partir de várias fontes, combinadas para reduzir o risco de omissões e de requisitos mal compreendidos:
+Entrevistas simuladas com representantes dos diferentes perfis de utilizador (cidadão, técnico municipal, gestor municipal), conduzidas pela equipa com base no conhecimento do domínio e em papéis representativos (personas), dado o âmbito académico do trabalho.
+Observação e análise do processo actual (informal) de reporte de problemas urbanos em Maputo, incluindo os canais hoje usados pelos cidadãos (telefone, redes sociais, deslocação presencial).
+Análise documental de regulamentos e da estrutura orgânica típica de um conselho municipal moçambicano, para identificar departamentos, categorias de ocorrência e fluxos de responsabilidade realistas.
+Benchmarking de sistemas internacionais com propósito semelhante (por exemplo, plataformas de reporte cívico como FixMyStreet e SeeClickFix), para identificar boas práticas de usabilidade e funcionalidades de referência.
+Sessões de brainstorming interno da equipa, para identificar oportunidades de valor acrescentado através de Inteligência Artificial (classificação automática, deteção de duplicados, priorização), alinhadas com os objectivos do sistema.
+Pesquisa bibliográfica em Engenharia de Requisitos e Engenharia de Software, nomeadamente o material da unidade curricular, para orientar a técnica de elicitação e a estrutura dos requisitos funcionais e não funcionais.
+6. Stakeholders do Sistema
+Identificaram-se os seguintes stakeholders (partes interessadas) do sistema "Cidadão Ativo", distinguindo entre utilizadores directos do sistema e partes interessadas indirectas:
+
+[TABELA]
+Stakeholder | Interesse no sistema
+Cidadão | Utilizador final que reporta problemas urbanos, acompanha o estado das suas denúncias e avalia a resolução. Principal beneficiário directo do sistema.
+Técnico Municipal | Responsável por executar a resolução das ocorrências que lhe são atribuídas e reportar a conclusão com evidência fotográfica.
+Gestor Municipal | Coordena o fluxo de denúncias do seu município: analisa, atribui técnicos, altera estados e acompanha indicadores no dashboard.
+Administrador do Sistema | Gere utilizadores, categorias e a configuração geral da plataforma.
+Conselho Municipal de Maputo | Entidade patrocinadora e responsável last-mile pela resolução dos problemas reportados; beneficia de dados agregados para planeamento.
+Departamentos técnicos (Vias, Saneamento, Iluminação, Ambiente e Segurança) | Unidades operacionais que recebem e executam as denúncias da sua área de competência.
+Sociedade civil / Comunidade em geral | Beneficiário indirecto: acede ao mapa público de ocorrências, o que promove transparência e responsabilização (accountability).
+Equipa de desenvolvimento (Aurélio Langa e Nelson Dzimba) | Responsável pela concepção, implementação e documentação do sistema.
+Docentes da Unidade Curricular | Avaliam o processo e o produto face aos critérios académicos definidos.
+[/TABELA]
+
+7. Técnica de Elicitação de Requisitos
+7.1. Entrevistas - Descrição, Vantagens e Desvantagens
+A equipa adoptou a Entrevista como técnica principal de elicitação de requisitos, complementada por sessões internas de Brainstorming para gerar e discutir ideias de funcionalidades adicionais, nomeadamente as relacionadas com Inteligência Artificial.
+A entrevista é uma técnica de elicitação de requisitos que consiste num diálogo estruturado, semi-estruturado ou não estruturado entre o analista (ou equipa de desenvolvimento) e um ou mais stakeholders, com o objectivo de compreender as suas necessidades, expectativas, restrições e o contexto de utilização do sistema a construir.
+Características principais:
+Entrevistas estruturadas: seguem um guião fixo de perguntas, aplicado da mesma forma a todos os entrevistados -facilita a comparação de respostas, mas limita a exploração de temas não previstos.
+Entrevistas não estruturadas: conversas abertas, sem guião rígido, que permitem explorar livremente o domínio do problema -úteis nas fases iniciais, quando ainda não se conhece bem o problema.
+Entrevistas semi-estruturadas: combinam um guião base de perguntas-chave com liberdade para aprofundar respostas inesperadas -foi este o formato escolhido pela equipa, por equilibrar cobertura e profundidade.
+Podem ser conduzidas presencialmente, por chamada, ou por escrito, e envolvem tipicamente um ou dois entrevistadores por sessão.
+Vantagens:
+Permite obter informação rica e detalhada, incluindo motivações, prioridades e casos excepcionais que dificilmente surgiriam num questionário fechado.
+Possibilita esclarecer imediatamente ambiguidades, através de perguntas de seguimento (follow-up).
+Cria proximidade e confiança entre a equipa de desenvolvimento e o stakeholder, o que facilita validações futuras dos requisitos.
+Adequa-se bem a domínios complexos ou pouco documentados, como é o caso dos processos internos de um município.
+Permite captar necessidades tácitas -aquilo que o stakeholder considera óbvio e por isso normalmente não menciona espontaneamente, mas que emerge através de perguntas direccionadas.
+Desvantagens:
+É uma técnica que consome bastante tempo, tanto na preparação como na condução e posterior análise de cada entrevista.
+Está sujeita a enviesamento (bias): o entrevistado pode responder de acordo com o que julga que o entrevistador espera ouvir, ou o entrevistador pode conduzir a conversa de forma tendenciosa.
+Não escala bem para um número elevado de stakeholders -nesses casos, é preferível combinar com questionários.
+Depende fortemente da disponibilidade e vontade de colaborar dos entrevistados, o que nem sempre é garantido, sobretudo em organizações públicas com agendas preenchidas.
+A qualidade dos requisitos obtidos depende muito da experiência do entrevistador em formular boas perguntas e em interpretar correctamente as respostas.
+Quando deve/pode ser usada:
+Nas fases iniciais de um projecto, quando o domínio do problema ainda não está bem compreendido pela equipa.
+Quando o número de stakeholders-chave é reduzido e claramente identificável -como é o caso deste projecto, com quatro perfis de utilizador bem definidos.
+Quando é necessário compreender processos de negócio complexos, regras implícitas, ou motivações por detrás de determinadas necessidades.
+Em complemento a outras técnicas (como questionários ou análise documental), para validar e aprofundar dados recolhidos por essas vias.
+7.2. Aplicação da Técnica pelo Grupo neste Trabalho
+Dado o âmbito académico deste trabalho e a indisponibilidade de acesso directo a funcionários do Conselho Municipal de Maputo no período de realização do trabalho, o grupo simulou entrevistas semi-estruturadas com base em personas representativas dos principais stakeholders -uma prática comum em contextos académicos e mesmo profissionais, quando o acesso directo aos utilizadores finais é limitado. Foi elaborado um guião-base, adaptado a cada perfil, e as respostas foram construídas com base em investigação sobre processos municipais reais e no bom senso da equipa sobre necessidades típicas de cada papel.
+Excerto do guião utilizado (perfil "Gestor Municipal"):
+"Hoje, como é que os problemas reportados pelos cidadãos chegam até si, e como decide qual resolver primeiro?"
+"Que informação precisa de ter sobre uma ocorrência para conseguir atribuí-la à equipa certa?"
+"Como sabe, actualmente, se um problema já foi reportado antes por outro cidadão?"
+"Que tipo de relatório ou visão geral gostaria de ter sobre o desempenho da sua equipa?"
+Requisitos que emergiram directamente desta entrevista simulada:
+Da primeira pergunta resultou o requisito de encaminhamento automático da denúncia para o departamento responsável, com base na categoria (em vez de triagem manual).
+Da segunda pergunta resultou a exigência de a denúncia incluir sempre fotografia, localização GPS e categoria, para o gestor poder atribuir com confiança.
+Da terceira pergunta resultou directamente a funcionalidade de Deteção de Denúncias Duplicadas, que compara localização e conteúdo de novas denúncias com as já existentes.
+Da quarta pergunta resultou o Dashboard administrativo, com estatísticas de denúncias por estado, categoria, bairro e tempo médio de resolução.
+De forma semelhante, a entrevista simulada ao perfil "Cidadão" evidenciou a necessidade de acompanhamento do estado da denúncia após o reporte (o que deu origem à máquina de estados e ao painel "As minhas denúncias"), e a entrevista ao perfil "Técnico" evidenciou a necessidade de uma lista clara de tarefas atribuídas e de um mecanismo simples para comprovar a resolução com fotografia. As sessões de brainstorming complementares, focadas em identificar oportunidades de diferenciação do sistema, deram origem às restantes funcionalidades de Inteligência Artificial (classificação automática, resumo automático, priorização automática e chatbot de apoio).
+8. Requisitos Funcionais
+
+[TABELA]
+Cód. | Requisito Funcional
+RF01 | O sistema deve permitir o registo e autenticação de utilizadores, com atribuição de um papel (cidadão, técnico, município, administrador).
+RF02 | O sistema deve permitir ao cidadão criar uma denúncia com categoria, descrição, fotografia e localização (GPS ou selecção manual no mapa).
+RF03 | O sistema deve encaminhar automaticamente cada denúncia para o município e departamento responsável, com base na categoria.
+RF04 | O sistema deve apresentar um mapa interactivo público com todas as denúncias, com filtros por categoria, estado e bairro.
+RF05 | O sistema deve permitir ao cidadão consultar a lista e o estado actual de todas as denúncias que criou.
+RF06 | O sistema deve permitir ao técnico visualizar as tarefas que lhe foram atribuídas, iniciar a execução e submeter prova fotográfica de resolução.
+RF07 | O sistema deve permitir ao gestor municipal filtrar, atribuir técnico e alterar o estado de qualquer denúncia do seu município.
+RF08 | O sistema deve apresentar um dashboard com estatísticas (total, pendentes, em execução, resolvidas, tempo médio de resolução, categorias e bairros mais frequentes).
+RF09 | O sistema deve implementar uma máquina de estados para a denúncia (Recebida → Em Análise → Atribuída → Em Execução → Resolvida → Fechada, com possibilidade de Rejeitada).
+RF10 | O sistema deve permitir ao cidadão avaliar a resolução da denúncia após esta ser marcada como resolvida.
+RF11 | O sistema deve classificar automaticamente a categoria e a gravidade de uma denúncia a partir da descrição e/ou da fotografia, usando Inteligência Artificial.
+RF12 | O sistema deve detectar possíveis denúncias duplicadas (mesma localização, categoria e conteúdo semelhante) e sugerir ao cidadão confirmar uma já existente.
+RF13 | O sistema deve gerar um resumo automático de descrições longas, para consulta rápida pelo técnico.
+RF14 | O sistema deve calcular automaticamente um nível de prioridade/urgência para cada denúncia.
+RF15 | O sistema deve disponibilizar um chatbot de apoio ao cidadão, para esclarecer dúvidas sobre como reportar ou acompanhar uma denúncia.
+RF16 | O sistema deve gerar automaticamente um resumo textual das principais estatísticas do dashboard.
+[/TABELA]
+
+9. Requisitos Não Funcionais
+
+[TABELA]
+Cód. | Requisito Não Funcional
+RNF01 | Usabilidade: a interface deve ser simples e utilizável por cidadãos com literacia digital básica, incluindo em dispositivos móveis.
+RNF02 | Desempenho: as páginas principais (mapa, listagens) devem carregar em menos de 3 segundos em condições normais de rede.
+RNF03 | Segurança: as passwords devem ser armazenadas de forma cifrada (hash), e o acesso às áreas restritas deve ser protegido por controlo de sessão e por papel (role-based access control).
+RNF04 | Disponibilidade: o sistema deve estar disponível para consulta pública do mapa a qualquer hora, sem necessidade de autenticação.
+RNF05 | Portabilidade: o sistema deve poder ser instalado em ambiente de hospedagem convencional (ex: XAMPP/LAMP), sem dependências complexas.
+RNF06 | Manutenibilidade: o código deve seguir uma arquitectura em camadas (Controllers, Services, Models/Views), facilitando manutenção e extensão futura.
+RNF07 | Escalabilidade: a arquitectura da base de dados deve suportar o crescimento do número de denúncias e municípios sem redesenho estrutural.
+RNF08 | Compatibilidade: o sistema deve funcionar correctamente nos principais navegadores web actuais (Chrome, Firefox, Edge, Safari).
+RNF09 | Localização: toda a interface e mensagens do sistema devem estar em português.
+RNF10 | Resiliência das funcionalidades de IA: cada funcionalidade de Inteligência Artificial deve poder ser activada/desactivada de forma independente, sem afectar o funcionamento do resto do sistema.
+[/TABELA]
+
+10. Casos de Uso do Sistema
+Apresentam-se os principais casos de uso do sistema, organizados por actor. Cada actor corresponde a um papel (role) definido no sistema.
+10.1. Actor: Cidadão
+
+[TABELA]
+Caso de Uso | Descrição
+Registar Conta / Autenticar-se | Criar uma conta e iniciar sessão como cidadão.
+Criar Denúncia | Reportar um problema urbano com categoria, descrição, foto e localização.
+Consultar Estado da Denúncia | Ver a lista e o histórico de estados das próprias denúncias.
+Confirmar Denúncia Duplicada | Confirmar que um problema já reportado por outro cidadão é o mesmo que ia reportar.
+Avaliar Resolução | Avaliar o serviço prestado após a denúncia ser marcada como resolvida.
+Consultar Mapa Público | Visualizar todas as ocorrências no mapa, com filtros (sem necessidade de autenticação).
+Interagir com o Chatbot | Colocar questões ao assistente virtual sobre o funcionamento da plataforma.
+[/TABELA]
+
+10.2. Actor: Técnico Municipal
+
+[TABELA]
+Caso de Uso | Descrição
+Consultar Tarefas Atribuídas | Ver a lista de denúncias atribuídas ao técnico.
+Iniciar Execução | Marcar uma denúncia atribuída como "Em Execução".
+Submeter Resolução | Anexar fotografia de resolução e marcar a denúncia como "Resolvida".
+[/TABELA]
+
+10.3. Actor: Gestor Municipal
+
+[TABELA]
+Caso de Uso | Descrição
+Filtrar Denúncias | Filtrar todas as denúncias do município por categoria, estado ou bairro.
+Atribuir Técnico | Atribuir um técnico do departamento competente a uma denúncia.
+Alterar Estado da Denúncia | Avançar o estado da denúncia conforme a máquina de estados definida.
+Consultar Dashboard | Visualizar estatísticas agregadas e o mapa de calor de ocorrências.
+[/TABELA]
+
+10.4. Actor: Administrador
+
+[TABELA]
+Caso de Uso | Descrição
+Gerir Utilizadores | Criar, editar ou desactivar contas de utilizador e respectivos papéis.
+Gerir Categorias e Departamentos | Configurar categorias de ocorrência e a sua associação a departamentos.
+[/TABELA]
+
+11. Metodologia (Modelo de Processo de Software) Utilizada
+11.1. Scrum - Características e Fases
+A equipa adoptou o Scrum como modelo de processo de desenvolvimento de software. O Scrum é um modelo ágil, iterativo e incremental, em que o trabalho é organizado em ciclos curtos e de duração fixa, designados sprints, no final de cada um dos quais é entregue um incremento funcional e testável do produto.
+Papéis definidos pelo Scrum:
+Product Owner (Dono do Produto): responsável por definir e priorizar o Product Backlog, representando a voz dos stakeholders e do negócio.
+Scrum Master: facilita o processo, remove impedimentos e garante que a equipa segue as práticas e valores do Scrum.
+Equipa de Desenvolvimento: grupo autoorganizado responsável por transformar os itens do backlog em incrementos de produto.
+Artefactos:
+Product Backlog: lista priorizada de todas as funcionalidades, requisitos e melhorias pretendidas para o produto.
+Sprint Backlog: subconjunto de itens do Product Backlog seleccionados para serem entregues numa sprint específica.
+Incremento: soma de todos os itens do Product Backlog concluídos durante uma sprint, integrados com o trabalho de sprints anteriores.
+Eventos (cerimónias):
+Sprint Planning: reunião de planeamento no início da sprint, onde se define o objectivo e se selecciona o trabalho a realizar.
+Daily Scrum: reunião curta e diária de sincronização da equipa (adaptada, neste projecto de dois elementos, para um ponto de situação regular).
+Sprint Review: reunião no final da sprint para apresentar o incremento produzido aos stakeholders e recolher feedback.
+Sprint Retrospective: reunião de reflexão da equipa sobre o processo, identificando melhorias para a sprint seguinte.
+11.2. Vantagens, Desvantagens e Quando Deve Ser Usado
+Vantagens:
+Permite entregar valor de forma antecipada e contínua, através de incrementos funcionais a cada sprint, em vez de esperar por uma entrega única no final do projecto.
+Facilita a adaptação a mudanças de requisitos, frequentes em projectos cujo domínio ainda está a ser compreendido - como foi o caso deste projecto.
+Aumenta a transparência do progresso, através de revisões regulares com os stakeholders (ou, neste caso académico, com os docentes).
+Promove a auto-organização e a responsabilização da equipa.
+Reduz o risco global do projecto, pois problemas são identificados cedo, sprint a sprint, em vez de apenas no final.
+Desvantagens:
+Exige disciplina e maturidade da equipa; sem isso, o processo pode degenerar em falta de planeamento estruturado.
+Dificulta a previsão exacta de âmbito, custo e prazo finais logo no início do projecto -o que pode ser um problema em contratos de preço e âmbito fixos.
+Requer um Product Owner disponível e capaz de tomar decisões de priorização de forma contínua, o que nem sempre é fácil de garantir.
+Pode ser menos adequado a projectos com requisitos regulatórios muito rígidos e imutáveis, definidos à partida.
+Quando deve/pode ser usado:
+Quando os requisitos são susceptíveis de evoluir ao longo do projecto, ou não estão totalmente claros no início.
+Quando é valioso obter feedback cedo e frequente dos stakeholders sobre o produto em construção.
+Em equipas pequenas e colaborativas, capazes de se auto-organizar -como a equipa de dois elementos deste trabalho.
+Em projectos de desenvolvimento de produto digital, onde a iteração rápida é uma vantagem competitiva.
+11.3. Aplicação do Scrum pelo Grupo neste Trabalho
+A equipa aplicou os princípios do Scrum de forma adaptada à sua dimensão (dois elementos), organizando o desenvolvimento do sistema "Cidadão Ativo" em três sprints, cada uma com um objectivo claro, um Sprint Backlog definido a partir do Product Backlog geral do sistema, e uma revisão (resumo) no final, antes de avançar para a sprint seguinte -replicando, à escala do projecto, o ciclo Planning → Execução → Review do Scrum.
+
+[TABELA]
+Sprint | Objectivo (Sprint Goal) | Principais entregas do incremento
+Sprint 1 -Núcleo Funcional | Ter um sistema minimamente utilizável, do reporte à visualização. | Autenticação por papéis; criação de denúncia com foto e GPS; mapa interactivo público; painel do cidadão; máquina de estados; encaminhamento automático por categoria.
+Sprint 2 -Painéis Administrativos | Dar ao município e ao técnico as ferramentas para gerir e resolver denúncias. | Painel do município (filtros, atribuição de técnico, alteração de estado); painel do técnico (iniciar/resolver com foto); dashboard com estatísticas e mapa de calor.
+Sprint 3 -Inteligência Artificial | Automatizar classificação, deteção de duplicados e apoio ao cidadão. | Classificação automática (texto e visão computacional); deteção de duplicados (GPS, texto e comparação visual); resumo automático; priorização automática; chatbot; dashboard inteligente.
+[/TABELA]
+
+No final de cada sprint, foi feita uma revisão do incremento entregue (equivalente à Sprint Review), com um resumo das funcionalidades concluídas e das limitações conhecidas, antes de se avançar para o planeamento da sprint seguinte -nomeadamente a decisão, tomada na Sprint 2, de alinhar as views e o dashboard do município com as necessidades reais identificadas na entrevista ao Gestor Municipal, e a decisão, tomada após a Sprint 3, de reforçar a deteção de duplicados com comparação visual das fotografias, na sequência de um requisito adicional identificado pela equipa (evitar que dois cidadãos reportem, sem saber, o mesmo problema no mesmo local).
+12. Entregáveis
+Definem-se os seguintes entregáveis para o projecto "Cidadão Ativo", correspondentes tanto ao presente trabalho académico como ao ciclo de desenvolvimento do sistema:
+
+[TABELA]
+Entregável | Descrição
+Documento de Especificação de Requisitos | O presente relatório, incluindo contextualização, requisitos, casos de uso, metodologia e gestão do projecto.
+Protótipo / Sistema Funcional | Código-fonte do sistema "Cidadão Ativo", desenvolvido de forma incremental ao longo das três sprints.
+Modelo de Base de Dados | Esquema da base de dados (tabelas, relações) e scripts de criação/povoamento (seed).
+Manual de Instalação | Documento README com instruções passo-a-passo para instalação e execução do sistema.
+Registo e Plano de Gestão de Riscos | Ficheiro em Excel com a identificação, análise e estratégias de resposta aos 10 riscos do projecto (Anexo 1).
+Cronograma de Actividades | Planeamento temporal das actividades do projecto (secção 13 deste documento).
+Apresentação Final | Conjunto de slides para apresentação e defesa oral do trabalho.
+[/TABELA]
+
+13. Cronograma de Actividades
+O cronograma seguinte organiza as actividades do projecto ao longo do semestre, alinhado com a estrutura de sprints definida na metodologia adoptada.
+
+[TABELA]
+Período (Semanas) | Fases | Actividade Detalhada
+Semana 1 | Requisitos | Contextualização, definição do problema e do caso de estudo; elicitação e elaboração do documento de requisitos; planeamento do Product Backlog.
+Semana 2 | Design | Definição da arquitectura, prototipagem e design da solução. (Fase adicionada para manter a coerência com a imagem).
+Semana 3–4 | Back-end | Sprint 1: Desenvolvimento do núcleo funcional focado na lógica de servidor e base de dados (autenticação, denúncias, mapa).
+Semana 5–6 | Front-end | Sprint 2: Desenvolvimento de interfaces, focando nos painéis administrativos e dashboard.
+Semana 7–8 | Back-end & Front-end | Sprint 3: Desenvolvimento full-stack e integração das funcionalidades de Inteligência Artificial.
+Semana 9 | Testes | Testes finais, correcção de defeitos e consolidação da documentação técnica.
+Semana 10 | Doc. e Apresentação | Elaboração da apresentação final, entrega do trabalho e preparação para a defesa perante os docentes.
+[/TABELA]
+
+14. Gestão de Riscos
+Foi elaborado um registo completo de gestão de riscos do projecto, identificando 10 riscos, a sua probabilidade, impacto, severidade calculada, estratégia de resposta e responsável. Este registo encontra-se no ficheiro em anexo "Cidadao_Ativo_Registo_de_Riscos.xlsx" (Anexo 1), e é resumido na tabela seguinte pelos cinco riscos de maior severidade:
+
+[TABELA]
+Risco | Categoria | Severidade | Estratégia
+Indisponibilidade de um elemento do grupo em fase crítica | Recursos Humanos | Alta | Mitigar -documentação partilhada e programação em par
+Chave de API de IA indisponível ou com custo inesperado | Técnico | Alta | Mitigar -fallback heurístico sem IA em todas as funcionalidades
+Atraso na integração das funcionalidades de IA (Sprint 3) | Cronograma | Média-Alta | Mitigar -arquitectura modular activável/desactivável
+Requisitos mal compreendidos por falta de acesso real ao CMM | Requisitos | Média-Alta | Mitigar -uso de personas e validação cruzada na equipa
+Perda de dados/código por falta de versionamento | Técnico | Média | Evitar -controlo de versões e cópias de segurança regulares
+[/TABELA]
+
+A lista completa dos 10 riscos, incluindo os restantes cinco (de severidade média e baixa) e todos os campos do modelo de gestão de riscos, está disponível no Anexo 1 (ficheiro Excel).
+15. Matriz de Dependência
+A tabela seguinte apresenta as dependências entre as principais actividades do projecto, indicando quais devem estar concluídas antes de cada actividade poder iniciar-se.
+
+[TABELA]
+Actividade | Depende de
+A1 -Contextualização e definição do problema | —
+A2 -Elicitação de requisitos | A1
+A3 -Documento de requisitos (RF, RNF, casos de uso) | A2
+A4 -Modelação da base de dados | A3
+A5 -Sprint 1 (núcleo funcional) | A3, A4
+A6 -Sprint Review 1 / Planeamento Sprint 2 | A5
+A7 -Sprint 2 (painéis administrativos) | A6
+A8 -Sprint Review 2 / Planeamento Sprint 3 | A7
+A9 -Sprint 3 (Inteligência Artificial) | A8
+A10 -Testes finais e consolidação | A9
+A11 -Documentação final (relatório, riscos, cronograma) | A2, A5, A7, A9
+A12 -Apresentação e defesa | A10, A11
+[/TABELA]
+
