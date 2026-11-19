@@ -502,11 +502,11 @@ def capa(doc):
     linha("UNIVERSIDADE EDUARDO MONDLANE", 16, True, 8, WD_ALIGN_PARAGRAPH.CENTER)
     linha("Faculdade de Ciências", 12, False, 4, WD_ALIGN_PARAGRAPH.CENTER)
     linha("Departamento de Matemática e Informática", 12, False, 4, WD_ALIGN_PARAGRAPH.CENTER)
-    linha("Licenciatura em Informática  -  Pós-laboral", 12, True, 12, WD_ALIGN_PARAGRAPH.CENTER)
+    linha("Licenciatura em Informática — Pós-laboral", 12, True, 12, WD_ALIGN_PARAGRAPH.CENTER)
     linha("Engenharia de Software", 12, False, 30, WD_ALIGN_PARAGRAPH.CENTER)
     linha("Trabalho Semestral — Documento Final", 14, True, 10, WD_ALIGN_PARAGRAPH.CENTER)
     linha(
-        "\"Cidadão Ativo\" — Plataforma de Reporte Urbano para o Conselho Municipal de Maputo",
+        "Cidadão Ativo: Plataforma de Reporte Urbano para o Conselho Municipal de Maputo",
         12, False, 10, WD_ALIGN_PARAGRAPH.CENTER,
     )
     linha(
